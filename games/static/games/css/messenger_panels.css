@@ -1,558 +1,1259 @@
-/* ============================================================
-   MondongoGames - Paneles tipo Messenger (Mensajes/Amigos)
-   ============================================================ */
+/* =========================================================
+   VARIABLES GLOBALES
+   - Medidas, colores y sombras base del sistema MG
+========================================================= */
+:root {
+    --mg-panel-w: 360px;
 
-:root{
-  --mg-panel-w: 360px;
+    --mg-panel-bg: rgba(10, 0, 30, 0.92);
+    --mg-panel-border: rgba(0, 255, 255, 0.25);
 
-  /* Mondongo Dark */
-  --mg-panel-bg: rgba(8, 5, 20, 0.92);
-  --mg-panel-border: rgba(0, 240, 255, 0.18);
+    --mg-text: #ffffff;
+    --mg-muted: rgba(255, 255, 255, 0.65);
 
-  --mg-text: #ffffff;
-  --mg-muted: rgba(255,255,255,0.65);
+    --mg-primary: #00f0ff;
+    --mg-primary-2: #b400ff;
 
-  --mg-primary: #00f0ff;
-  --mg-primary-2: #b400ff;
+    --mg-shadow:
+        0 0 20px rgba(0, 255, 255, 0.15),
+        0 0 40px rgba(255, 0, 255, 0.10);
 
-  --mg-shadow: 0 18px 60px rgba(0,0,0,.55);
+    --mg-radius-lg: 20px;
+    --mg-radius-md: 16px;
+    --mg-radius-sm: 12px;
+    --mg-transition: 0.18s ease;
 }
 
-/* Backdrop */
-.mg-backdrop{
-  position:fixed;
-  inset:0;
-  background: rgba(0,0,0,.45);
-  opacity:0;
-  pointer-events:none;
-  transition: .18s ease;
-  z-index: 1500;
-}
-.mg-backdrop.show{ opacity:1; pointer-events:auto; }
+/* =========================================================
+   BACKDROP
+   - Fondo oscuro detrás de paneles abiertos
+========================================================= */
+.mg-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1500;
 
-/* Panel */
-.mg-panel{
-  position:fixed;
-  top: 78px;
-  right: 18px;
-  width: var(--mg-panel-w);
-  height: calc(100vh - 110px);
-
-  background: rgba(10, 0, 30, 0.92); /* 👈 oscuro Mondongo */
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-
-  border: 1px solid rgba(0,255,255,0.25); /* 👈 borde neon */
-  border-radius: 20px;
-
-  box-shadow:
-      0 0 20px rgba(0,255,255,0.15),
-      0 0 40px rgba(255,0,255,0.10);
-
-  transform: translateX(16px);
-  opacity: 0;
-  pointer-events:none;
-  transition: .18s ease;
-  z-index: 2000;
-  overflow:hidden;
-  isolation: isolate;
-}
-.mg-panel.open{
-  transform: translateX(0);
-  opacity: 1;
-  pointer-events:auto;
+    background: rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: var(--mg-transition);
 }
 
-.mg-panel__head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding: 12px 12px;
-  border-bottom: 1px solid rgba(0,240,255,0.12);
-}
-.mg-panel__title{ font-weight:900; letter-spacing:.3px; }
-.mg-panel__close{
-  border:none;
-  background: transparent;
-  font-size: 18px;
-  cursor:pointer;
-  padding: 6px 10px;
-  border-radius: 10px;
-}
-.mg-panel__close:hover{ background: rgba(0,240,255,0.08); }
-
-.mg-panel__search{ 
-  padding: 8px 10px; 
-  border-bottom:1px solid rgba(0,240,255,0.10); 
+.mg-backdrop.show {
+    opacity: 1;
+    pointer-events: auto;
 }
 
-.mg-panel__search input{
-  width:100%;
-  padding: 10px 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(0,240,255,0.18);
-  background: rgba(0,0,0,0.28);
-  color: var(--mg-text);
-  outline:none;
-}
-.mg-panel__search input::placeholder{ color: rgba(234,247,255,.55); }
-.mg-panel__search input:focus{
-  border-color: rgba(0,240,255,0.42);
-  box-shadow: 0 0 0 3px rgba(0,240,255,0.10);
+/* =========================================================
+   PANEL BASE
+   - Estructura general para chat, amigos y notificaciones
+========================================================= */
+.mg-panel {
+    position: fixed;
+    top: 78px;
+    right: 18px;
+    z-index: 2000;
+
+    width: var(--mg-panel-w);
+    height: calc(100vh - 110px);
+    overflow: hidden;
+    isolation: isolate;
+
+    background: var(--mg-panel-bg);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+
+    border: 1px solid var(--mg-panel-border);
+    border-radius: var(--mg-radius-lg);
+    box-shadow: var(--mg-shadow);
+
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(16px);
+    transition: var(--mg-transition);
 }
 
-.mg-split{
-  display:flex;
-  height: calc(100% - 124px); /* ✅ head (48) + search (76 aprox) */
-  min-height: 0;              /* ✅ importantísimo para que flex no corte */
-}
-.mg-left{ 
-  width: 40%; 
-  border-right:1px solid rgba(0,240,255,0.10);
-  display:flex; 
-  flex-direction:column; 
-}
-.mg-right{ 
-  width: 60%;
-  display:flex;
-  flex-direction:column;
-  min-height: 0;     /* ✅ evita corte */
-  overflow: hidden;  /* ✅ evita que se salga */
-}
+/* Glow decorativo detrás del panel */
+.mg-panel::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    z-index: 0;
+    pointer-events: none;
 
-.mg-left__tabs{
-  display:flex;
-  gap:8px;
-  padding: 10px 10px;
-  flex-wrap: wrap;          /* ✅ permite bajar a otra línea */
-  align-items:center;
+    border-radius: 22px;
+    background: linear-gradient(
+        120deg,
+        rgba(0, 255, 255, 0.35),
+        rgba(255, 0, 255, 0.25),
+        rgba(0, 255, 255, 0.35)
+    );
+    filter: blur(14px);
+    opacity: 0.22;
 }
 
-.mg-left__tabs .mg-tab{
-  flex: 0 1 auto;
-  max-width: 100%;
-}
-.mg-left__tabs--friends{ border-bottom:1px solid rgba(0,0,0,0.08); }
-
-.mg-tab{
-  padding: 7px 10px;
-  border-radius: 999px;
-  font-size: 11px;
-  border: 1px solid rgba(255,255,255,0.10);
-  background: rgba(255,255,255,0.06);
-  color: rgba(255,255,255,0.78);
-  white-space: nowrap;
+/* Asegura que el contenido quede encima del glow */
+.mg-panel > * {
+    position: relative;
+    z-index: 1;
 }
 
-.mg-tab.is-active{
-  background: rgba(0,255,255,0.12);
-  border-color: rgba(0,255,255,0.25);
-  color: #00ffff;
-  box-shadow: 0 0 12px rgba(0,255,255,0.12);
-}
-.mg-tab--primary{ 
-  margin-left:auto; 
-  background: rgba(180,0,255,0.18);
-  border: 1px solid rgba(180,0,255,0.22); 
-}
-.mg-tab:hover{ filter: brightness(0.98); }
-
-.mg-list{
-  overflow:auto;
-  padding: 4px 6px 10px;
-}
-.mg-empty{
-  padding: 14px 12px;
-  color: rgba(255,255,255,0.55);
-  font-size: 13px;
-  letter-spacing: .3px;
+.mg-panel.open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0);
 }
 
-.mg-empty::after{
-  content:"";
-  display:block;
-  height:2px;
-  margin-top:10px;
-  border-radius:999px;
-  background: linear-gradient(90deg, transparent, rgba(0,255,255,0.45), transparent);
-  animation: mgScan 1.1s linear infinite;
+/* =========================================================
+   MODO JUEGO
+   - Paneles flotantes encima del juego
+========================================================= */
+.game-view #messagesPanel,
+.game-view #friendsPanel,
+.game-view #notificationsPanel {
+    top: 96px;
+    right: 24px;
+    left: auto;
+    z-index: 2700;
+
+    width: min(390px, 34vw);
+    min-width: 320px;
+    max-width: 420px;
+    height: min(72vh, 680px);
 }
 
-@keyframes mgScan{
-  0%{ transform: translateX(-20%); opacity:.4; }
-  50%{ opacity:1; }
-  100%{ transform: translateX(20%); opacity:.4; }
-}
-.mg-item{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding: 10px 10px;
-  border-radius: 12px;
-  cursor:pointer;
-}
-.mg-item:hover{ background: rgba(0,0,0,0.05); }
-.mg-item.is-active{ background: rgba(0,163,255,0.14); }
-
-.mg-avatar{
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid rgba(0,0,0,0.08);
-  background: #e2e8f0;
+.game-view #messagesPanel {
+    user-select: none;
 }
 
-.mg-item__meta{ min-width:0; }
-.mg-item__name{ font-weight:900; font-size: 12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.mg-item__last{ font-size: 11px; color: var(--mg-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 170px; }
-
-/* Chat */
-.mg-chat-empty{ padding: 14px; color: var(--mg-muted); }
-.mg-chat-empty h3{ 
-  color: var(--mg-text); 
-  font-size: 20px;
-  line-height: 1.15;
-  margin-bottom: 8px; }
-
-.mg-chat-empty p{
-  font-size: 12px;
-  line-height: 1.35;
+.game-view #messagesPanel .mg-panel__head {
+    cursor: grab;
 }
 
-.mg-chat{
-  height:100%;
-  min-height: 0;     /* ✅ */
-  display:flex;
-  flex-direction:column;
-}
-.mg-chat__head{
-  padding: 10px 12px;
-  border-bottom:1px solid rgba(0,240,255,0.10);
-}
-.mg-chat__user{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  min-width:0;
+.game-view #messagesPanel.mg-dragging .mg-panel__head {
+    cursor: grabbing;
 }
 
-.mg-chat__user img{
-  width:36px;
-  height:36px;
-  border-radius:50%;
-  object-fit:cover;
-  flex-shrink:0;          /* 👈 evita que se deforme/encime */
-  border:1px solid rgba(0,255,255,0.25);
-  box-shadow:0 0 12px rgba(0,255,255,0.12);
-}
-.mg-chat__name{ font-weight:900; font-size: 13px; }
-.mg-chat__sub{ font-size:11px; color: var(--mg-muted); }
-
-.mg-chat__body{
-  flex:1;
-  min-height: 0;   /* ✅ */
-  overflow:auto;
-  padding: 12px;
-  display:flex;
-  flex-direction:column;
-  gap: 8px;
-  padding-bottom: 18px;
-}
-.mg-bubble{
-  max-width: 84%;
-  padding: 9px 11px;
-  border-radius: 16px;
-  font-size: 12px;
-  line-height: 1.25;
-  word-wrap: break-word;
-  animation: mgPop .12s ease;
+.game-view #messagesPanel .mg-panel__search,
+.game-view #messagesPanel .mg-split,
+.game-view #messagesPanel .mg-chat__composer,
+.game-view #messagesPanel input,
+.game-view #messagesPanel button,
+.game-view #messagesPanel .mg-item {
+    user-select: auto;
 }
 
-@keyframes mgPop{
-  from{ transform: translateY(4px); opacity: .6; }
-  to{ transform: translateY(0); opacity: 1; }
+.game-view #messagesPanel.mg-panel--minimized {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: translateX(18px) scale(0.98) !important;
 }
 
-.mg-bubble.me{
-  align-self:flex-end;
-  background: linear-gradient(135deg, #00ffff33, #ff00ff33);
-  border: 1px solid rgba(0,255,255,0.35);
-  box-shadow: 0 0 10px rgba(0,255,255,0.2);
+.game-view .mg-dock-tab.show {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(-50%) translateX(0);
 }
 
-.mg-bubble.them{
-  align-self:flex-start;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
+.game-view .mg-backdrop {
+    display: none !important;
 }
 
-/* ================= COMPOSER PRO (Escribe un mensaje...) ================= */
-
-.mg-chat__composer{
-  position: sticky;
-  bottom: 0;
-  padding: 12px;
-  background: rgba(10,0,30,0.92);
-  backdrop-filter: blur(18px);
-  border-top: 1px solid rgba(0,240,255,0.12);
-
-  display:block;
-  position: relative; /* ✅ para anclar el botón dentro */
+/* =========================================================
+   CABECERA DEL PANEL
+========================================================= */
+.mg-panel__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    border-bottom: 1px solid rgba(0, 240, 255, 0.12);
 }
 
-.mg-chat__composer input{
-  width: 100%;
-  height: 46px;
-  padding: 0 56px 0 14px; /* ✅ espacio para el botón */
-  border-radius: 999px;
-
-  background: rgba(0,0,0,0.34);
-  border: 1px solid rgba(0,240,255,0.22);
-  color: var(--mg-text);
-  outline: none;
-
-  box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,0.03),
-    0 0 16px rgba(0,240,255,0.06);
-
-  transition: .18s ease;
+.mg-panel__title {
+    font-weight: 900;
+    letter-spacing: 0.3px;
 }
 
-.mg-chat__composer input::placeholder{
-  color: rgba(234,247,255,.48);
-  letter-spacing: .2px;
+.mg-panel__sub {
+    margin-top: 2px;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.55);
 }
 
-.mg-chat__composer input:focus{
-  border-color: rgba(0,240,255,0.48);
-  box-shadow:
-    0 0 0 3px rgba(0,240,255,0.12),
-    0 0 22px rgba(180,0,255,0.10);
+.mg-panel__close {
+    padding: 6px 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+
+    background: rgba(255, 255, 255, 0.04);
+    color: #ffffff;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+
+    transition: var(--mg-transition);
 }
 
-.mg-chat__composer button{
-  position: absolute;
-  right: 18px;
-  top: 50%;
-  transform: translateY(-50%);
-
-  width: 38px;
-  height: 38px;
-  border-radius: 999px;
-
-  border: 1px solid rgba(0,240,255,0.26);
-  background: linear-gradient(135deg, rgba(0,240,255,0.22), rgba(180,0,255,0.18));
-  box-shadow: 0 0 14px rgba(0,240,255,0.12);
-
-  cursor: pointer;
-  padding: 0;
-  font-size: 0; /* ✅ oculta "Enviar" */
+.mg-panel__close:hover {
+    background: rgba(255, 0, 255, 0.14);
+    border-color: rgba(0, 255, 255, 0.22);
+    box-shadow: 0 0 12px rgba(0, 255, 255, 0.14);
 }
 
-.mg-chat__composer button::before{
-  content:"";
-  position:absolute;
-  left: 14px;
-  top: 11px;
-  width:0;
-  height:0;
-  border-top: 7px solid transparent;
-  border-bottom: 7px solid transparent;
-  border-left: 10px solid rgba(255,255,255,0.92);
-  filter: drop-shadow(0 0 6px rgba(0,240,255,0.35));
+/* =========================================================
+   BUSCADOR DEL PANEL
+========================================================= */
+.mg-panel__search {
+    padding: 8px 10px;
+    border-bottom: 1px solid rgba(0, 240, 255, 0.10);
 }
 
-.mg-chat__composer button:hover{
-  transform: translateY(-50%) scale(1.04);
-  box-shadow: 0 0 18px rgba(0,240,255,0.20);
+.mg-panel__search input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 240, 255, 0.18);
+
+    background: rgba(0, 0, 0, 0.28);
+    color: var(--mg-text);
+    outline: none;
 }
 
-.mg-chat__composer button:active{
-  transform: translateY(-50%) scale(0.98);
+.mg-panel__search input::placeholder {
+    color: rgba(234, 247, 255, 0.55);
 }
 
-.mg-chat__composer button:disabled{
-  opacity: .55;
-  cursor: not-allowed;
+.mg-panel__search input:focus {
+    border-color: rgba(0, 240, 255, 0.42);
+    box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.10);
 }
 
-/* Friends panel tweaks */
-.mg-panel--friends{ right: calc(18px + var(--mg-panel-w) + 12px); }
-.mg-friends{ overflow:auto; padding: 8px 8px 14px; height: calc(100% - 56px); }
-.mg-requests{ overflow:auto; padding: 10px; height: calc(100% - 56px); }
-.mg-section-title{ font-size: 12px; font-weight:900; margin: 10px 0 6px; }
-
-.mg-request{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap: 10px;
-  padding: 10px;
-  border-radius: 12px;
-  background: rgba(0,0,0,0.04);
-  margin-bottom: 8px;
-}
-.mg-request__left{ display:flex; align-items:center; gap:10px; min-width:0; }
-.mg-request__actions{ display:flex; gap:8px; }
-.mg-btn{
-  border:none;
-  padding: 7px 9px;
-  border-radius: 10px;
-  cursor:pointer;
-  font-weight:900;
-  font-size: 12px;
-}
-.mg-btn--ok{ background: rgba(0,163,255,0.18); }
-.mg-btn--no{ background: rgba(0,0,0,0.08); }
-.mg-btn:hover{ filter: brightness(.98); }
-
-/* Modal */
-.mg-modal{
-  position:fixed;
-  inset:0;
-  display:none;
-  place-items:center;
-  background: rgba(0,0,0,.55);
-  z-index: 3000;
-}
-.mg-modal.open{ display:grid; }
-.mg-modal__card{
-  width: min(520px, 92vw);
-  background: var(--mg-panel-bg);
-  border-radius: 16px;
-  border: 1px solid rgba(0,0,0,0.10);
-  box-shadow: var(--mg-shadow);
-  padding: 14px;
-  color: var(--mg-text);
-}
-.mg-modal__head{ display:flex; align-items:center; justify-content:space-between; margin-bottom: 8px; }
-.mg-modal__close{ border:none; background:transparent; cursor:pointer; font-size:18px; padding: 6px 10px; border-radius: 10px; }
-.mg-modal__close:hover{ background: rgba(0,0,0,0.06); }
-.mg-muted{ color: var(--mg-muted); font-size: 13px; margin-bottom: 10px; }
-.mg-modal__form{ display:flex; gap: 8px; }
-.mg-modal__form input{ flex:1; padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.12); outline:none; }
-.mg-modal__form button{ border:none; padding: 10px 12px; border-radius: 12px; font-weight:900; cursor:pointer; background: rgba(0,163,255,0.18); }
-.mg-modal__status{ margin-top: 10px; font-size: 13px; color: var(--mg-muted); }
-
-@media (max-width: 920px){
-  .mg-panel{ right: 10px; width: min(92vw, 420px); }
-  .mg-panel--friends{ right: 10px; top: 78px; }
+/* =========================================================
+   SPLIT DEL CHAT
+   - Lista izquierda + conversación derecha
+========================================================= */
+.mg-split {
+    display: flex;
+    height: calc(100% - 124px);
+    min-height: 0;
 }
 
-.nav-icon-btn{ position:relative; }
+.mg-left {
+    width: 40%;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid rgba(0, 240, 255, 0.10);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent);
+}
 
-.mg-unread-badge{
-  position:absolute;
-  top:4px;
-  right:4px;
-  min-width:14px;
-  height:14px;
-  padding:0 4px;
-  border-radius:999px;
-  background:#ff00ff;
-  color:white;
-  font-size:9px;
-  font-weight:900;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  box-shadow:0 0 10px #ff00ff;
-  transition: transform .15s ease;
+.mg-right {
+    width: 60%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+    background: radial-gradient(120% 80% at 50% 0%, rgba(0, 240, 255, 0.06), transparent 55%);
 }
-.mg-unread-badge.bump{
-  transform: scale(1.25);
+
+/* =========================================================
+   TABS
+========================================================= */
+.mg-left__tabs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 10px;
 }
+
+.mg-left__tabs .mg-tab {
+    flex: 0 1 auto;
+    max-width: 100%;
+}
+
+.mg-left__tabs--friends {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.mg-tab {
+    padding: 7px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.mg-tab:hover {
+    filter: brightness(0.98);
+}
+
+.mg-tab.is-active {
+    background: rgba(0, 255, 255, 0.12);
+    border-color: rgba(0, 255, 255, 0.25);
+    color: #00ffff;
+    box-shadow: 0 0 12px rgba(0, 255, 255, 0.12);
+}
+
+.mg-tab--primary {
+    margin-left: auto;
+    background: rgba(180, 0, 255, 0.18);
+    border: 1px solid rgba(180, 0, 255, 0.22);
+}
+
+.mg-tab--requests {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.mg-tab--requests.has-pending {
+    border-color: rgba(255, 0, 255, 0.28);
+    box-shadow: 0 0 12px rgba(255, 0, 255, 0.10);
+}
+
+.mg-tab-badge {
+    min-width: 16px;
+    height: 16px;
+    padding: 0 5px;
+    border-radius: 999px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #ff00ff;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 900;
+    line-height: 1;
+    box-shadow: 0 0 10px rgba(255, 0, 255, 0.35);
+}
+
+.mg-tab-badge.is-zero {
+    background: rgba(255, 255, 255, 0.10);
+    color: rgba(255, 255, 255, 0.72);
+    box-shadow: none;
+}
+
+/* =========================================================
+   LISTAS
+========================================================= */
+.mg-list,
+.mg-friends,
+.mg-requests,
+.mg-notifications-list {
+    overflow: auto;
+}
+
+.mg-list {
+    padding: 4px 6px 10px;
+}
+
+.mg-friends {
+    height: calc(100% - 56px);
+    padding: 8px 8px 14px;
+}
+
+.mg-requests {
+    height: calc(100% - 56px);
+    padding: 10px;
+}
+
+.mg-notifications-list {
+    height: calc(100% - 56px);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Scrollbar custom */
 .mg-list::-webkit-scrollbar,
 .mg-chat__body::-webkit-scrollbar,
 .mg-friends::-webkit-scrollbar,
-.mg-requests::-webkit-scrollbar{
-  width: 8px;
+.mg-requests::-webkit-scrollbar {
+    width: 8px;
 }
 
 .mg-list::-webkit-scrollbar-thumb,
 .mg-chat__body::-webkit-scrollbar-thumb,
 .mg-friends::-webkit-scrollbar-thumb,
-.mg-requests::-webkit-scrollbar-thumb{
-  background: rgba(0,255,255,0.18);
-  border-radius: 999px;
-  border: 1px solid rgba(255,0,255,0.15);
-}
-.mg-panel::before{
-  content:"";
-  position:absolute;
-  inset:-2px;
-  border-radius: 22px;
-  background: linear-gradient(120deg,
-    rgba(0,255,255,0.35),
-    rgba(255,0,255,0.25),
-    rgba(0,255,255,0.35)
-  );
-  filter: blur(14px);
-  opacity: .22;
-  pointer-events:none;
-  z-index: 0;         /* 👈 atrás */
+.mg-requests::-webkit-scrollbar-thumb {
+    background: rgba(0, 255, 255, 0.18);
+    border: 1px solid rgba(255, 0, 255, 0.15);
+    border-radius: 999px;
 }
 
-.mg-panel > *{
-  position: relative;
-  z-index: 1;         /* 👈 contenido arriba */
+/* =========================================================
+   ESTADOS VACÍOS
+========================================================= */
+.mg-empty {
+    padding: 14px 12px;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 13px;
+    letter-spacing: 0.3px;
 }
 
-/* ===== Tablet / pantallas angostas: 1 columna ===== */
-@media (max-width: 900px){
-  :root{ --mg-panel-w: min(92vw, 440px); }
+.mg-empty::after {
+    content: "";
+    display: block;
+    height: 2px;
+    margin-top: 10px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.45), transparent);
+    animation: mgScan 1.1s linear infinite;
+}
 
-  .mg-panel{
-    right: 50%;
-    transform: translate(50%, 16px);
-    width: var(--mg-panel-w);
-    height: calc(100vh - 96px);
-  }
-  .mg-panel.open{
-    transform: translate(50%, 0);
-  }
+@keyframes mgScan {
+    0% {
+        transform: translateX(-20%);
+        opacity: 0.4;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(20%);
+        opacity: 0.4;
+    }
+}
 
-  .mg-split{
+/* =========================================================
+   ITEMS DE LISTA
+========================================================= */
+.mg-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.mg-item:hover {
+    background: rgba(0, 240, 255, 0.08);
+    border: 1px solid rgba(0, 240, 255, 0.14);
+}
+
+.mg-item.is-active {
+    background: rgba(0, 163, 255, 0.14);
+}
+
+.mg-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+
+    background: #e2e8f0;
+    border: 2px solid rgba(0, 0, 0, 0.08);
+}
+
+.mg-item__meta {
+    min-width: 0;
+}
+
+.mg-item__name {
+    font-size: 12px;
+    font-weight: 900;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mg-item__last {
+    max-width: 170px;
+    font-size: 11px;
+    color: var(--mg-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* =========================================================
+   CHAT
+========================================================= */
+.mg-chat {
+    display: flex;
     flex-direction: column;
-    height: calc(100% - 96px);
-  }
+    height: 100%;
+    min-height: 0;
+}
 
-  .mg-left{
+.mg-chat__head {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(0, 240, 255, 0.10);
+}
+
+.mg-chat__user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.mg-chat__user img {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    object-fit: cover;
+
+    border: 1px solid rgba(0, 255, 255, 0.25);
+    box-shadow: 0 0 12px rgba(0, 255, 255, 0.12);
+}
+
+.mg-chat__name {
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.mg-chat__sub {
+    font-size: 11px;
+    color: var(--mg-muted);
+}
+
+.mg-chat-empty {
+    padding: 14px;
+    color: var(--mg-muted);
+}
+
+.mg-chat-empty h3 {
+    margin-bottom: 8px;
+    color: var(--mg-text);
+    font-size: 20px;
+    line-height: 1.15;
+}
+
+.mg-chat-empty p {
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.mg-chat__body {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    padding: 12px 12px 18px;
+}
+
+/* Burbujas */
+.mg-bubble {
+    max-width: 84%;
+    padding: 9px 11px;
+    border-radius: 16px;
+
+    font-size: 12px;
+    line-height: 1.25;
+    word-wrap: break-word;
+    animation: mgPop 0.12s ease;
+}
+
+.mg-bubble.me {
+    align-self: flex-end;
+    background: linear-gradient(135deg, #00ffff33, #ff00ff33);
+    border: 1px solid rgba(0, 255, 255, 0.35);
+    box-shadow:
+        0 0 10px rgba(0, 240, 255, 0.18),
+        0 0 22px rgba(180, 0, 255, 0.10);
+}
+
+.mg-bubble.them {
+    align-self: flex-start;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+@keyframes mgPop {
+    from {
+        transform: translateY(4px);
+        opacity: 0.6;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* =========================================================
+   COMPOSER
+========================================================= */
+.mg-chat__composer {
+    position: sticky;
+    bottom: 0;
+    display: block;
+    padding: 12px;
+
+    background: rgba(10, 0, 30, 0.92);
+    backdrop-filter: blur(18px);
+    border-top: 1px solid rgba(0, 240, 255, 0.12);
+}
+
+.mg-chat__composer input {
     width: 100%;
-    border-right: none;
-    border-bottom: 1px solid rgba(0,240,255,0.10);
-    max-height: 44%;
-  }
+    height: 46px;
+    padding: 0 56px 0 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 240, 255, 0.22);
 
-  .mg-right{
-    width: 100%;
-    min-height: 56%;
-  }
+    background: rgba(0, 0, 0, 0.34);
+    color: var(--mg-text);
+    outline: none;
 
-  .mg-chat-empty h3{
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.03),
+        0 0 16px rgba(0, 240, 255, 0.06);
+
+    transition: var(--mg-transition);
+}
+
+.mg-chat__composer input::placeholder {
+    color: rgba(234, 247, 255, 0.48);
+    letter-spacing: 0.2px;
+}
+
+.mg-chat__composer input:focus {
+    border-color: rgba(0, 240, 255, 0.48);
+    box-shadow:
+        0 0 0 3px rgba(0, 240, 255, 0.12),
+        0 0 22px rgba(180, 0, 255, 0.10);
+}
+
+.mg-chat__composer button {
+    position: absolute;
+    top: 50%;
+    right: 18px;
+    transform: translateY(-50%);
+
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 240, 255, 0.26);
+
+    background: linear-gradient(135deg, rgba(0, 240, 255, 0.22), rgba(180, 0, 255, 0.18));
+    box-shadow: 0 0 14px rgba(0, 240, 255, 0.12);
+
+    cursor: pointer;
+    font-size: 0;
+}
+
+.mg-chat__composer button::before {
+    content: "";
+    position: absolute;
+    top: 11px;
+    left: 14px;
+
+    width: 0;
+    height: 0;
+    border-top: 7px solid transparent;
+    border-bottom: 7px solid transparent;
+    border-left: 10px solid rgba(255, 255, 255, 0.92);
+
+    filter: drop-shadow(0 0 6px rgba(0, 240, 255, 0.35));
+}
+
+.mg-chat__composer button:hover {
+    transform: translateY(-50%) scale(1.04);
+    box-shadow: 0 0 18px rgba(0, 240, 255, 0.20);
+}
+
+.mg-chat__composer button:active {
+    transform: translateY(-50%) scale(0.98);
+}
+
+.mg-chat__composer button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* =========================================================
+   PANELES DE FRIENDS Y NOTIFICACIONES
+========================================================= */
+.mg-panel--friends,
+.mg-panel--notifications {
+    right: 18px;
+}
+
+.mg-panel--friends.mg-panel--stacked,
+.mg-panel--notifications.mg-panel--stacked {
+    right: calc(18px + var(--mg-panel-w) + 12px);
+}
+
+.game-view .mg-panel--friends.mg-panel--stacked,
+.game-view .mg-panel--notifications.mg-panel--stacked {
+    right: 24px;
+}
+
+/* =========================================================
+   FRIEND REQUESTS
+========================================================= */
+.mg-section-title {
+    margin: 10px 0 6px;
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.mg-request {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    margin-bottom: 8px;
+    padding: 10px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.mg-request__left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.mg-request__actions {
+    display: flex;
+    gap: 8px;
+}
+
+.mg-btn {
+    padding: 7px 9px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.mg-btn:hover {
+    filter: brightness(0.98);
+}
+
+.mg-btn--ok {
+    background: rgba(0, 163, 255, 0.18);
+}
+
+.mg-btn--no {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+/* =========================================================
+   MODAL AÑADIR AMIGO
+========================================================= */
+.mg-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+
+    display: none;
+    place-items: center;
+    padding: 18px;
+
+    background: rgba(0, 0, 0, 0.68);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+}
+
+.mg-modal.open {
+    display: grid;
+}
+
+.mg-modal__card {
+    position: relative;
+    overflow: hidden;
+
+    width: min(560px, 94vw);
+    padding: 22px 22px 18px;
+
+    background: linear-gradient(180deg, rgba(8, 5, 20, 0.96), rgba(16, 0, 40, 0.96));
+    color: var(--mg-text);
+
+    border: 1px solid rgba(0, 240, 255, 0.18);
+    border-radius: 22px;
+    box-shadow:
+        0 22px 60px rgba(0, 0, 0, 0.45),
+        0 0 24px rgba(0, 240, 255, 0.08),
+        0 0 30px rgba(180, 0, 255, 0.08);
+}
+
+.mg-modal__card::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    z-index: 0;
+    pointer-events: none;
+
+    border-radius: 24px;
+    background: linear-gradient(
+        120deg,
+        rgba(0, 255, 255, 0.25),
+        rgba(180, 0, 255, 0.18),
+        rgba(0, 255, 255, 0.25)
+    );
+    filter: blur(16px);
+    opacity: 0.18;
+}
+
+.mg-modal__card > * {
+    position: relative;
+    z-index: 1;
+}
+
+.mg-modal__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.mg-modal__head h3 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 900;
+    letter-spacing: 0.3px;
+    color: #ffffff;
+    text-shadow: 0 0 10px rgba(0, 240, 255, 0.10);
+}
+
+.mg-modal__close {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+
+    background: rgba(255, 255, 255, 0.04);
+    color: #ffffff;
     font-size: 18px;
-    line-height: 1.1;
-  }
+    line-height: 1;
+    cursor: pointer;
+
+    transition: var(--mg-transition);
 }
 
-/* Separador más bonito entre lista y chat */
-.mg-left{
-  background: linear-gradient(180deg, rgba(255,255,255,0.04), transparent);
-}
-.mg-right{
-  background: radial-gradient(120% 80% at 50% 0%, rgba(0,240,255,0.06), transparent 55%);
+.mg-modal__close:hover {
+    background: rgba(255, 0, 255, 0.14);
+    border-color: rgba(0, 255, 255, 0.22);
+    box-shadow: 0 0 12px rgba(0, 255, 255, 0.14);
 }
 
-/* Hover más “Messenger” en items */
-.mg-item:hover{
-  background: rgba(0,240,255,0.08);
-  border: 1px solid rgba(0,240,255,0.14);
+.mg-muted {
+    margin-bottom: 16px;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 13px;
+    line-height: 1.45;
 }
 
-/* Burbujas con brillo leve */
-.mg-bubble.me{
-  box-shadow:
-    0 0 10px rgba(0,240,255,0.18),
-    0 0 22px rgba(180,0,255,0.10);
+.mg-modal__form {
+    display: flex;
+    align-items: stretch;
+    gap: 12px;
+}
+
+.mg-modal__form input {
+    flex: 1;
+    height: 48px;
+    padding: 0 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(0, 240, 255, 0.18);
+
+    background: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+    font-size: 14px;
+    outline: none;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.03),
+        0 0 12px rgba(0, 240, 255, 0.04);
+
+    transition: var(--mg-transition);
+}
+
+.mg-modal__form input::placeholder {
+    color: rgba(255, 255, 255, 0.42);
+}
+
+.mg-modal__form input:focus {
+    border-color: rgba(0, 240, 255, 0.45);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow:
+        0 0 0 3px rgba(0, 240, 255, 0.10),
+        0 0 18px rgba(180, 0, 255, 0.08);
+}
+
+.mg-modal__form button {
+    min-width: 150px;
+    height: 48px;
+    border-radius: 14px;
+    border: 1px solid rgba(0, 240, 255, 0.22);
+
+    background: linear-gradient(135deg, rgba(0, 240, 255, 0.20), rgba(180, 0, 255, 0.16));
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+
+    box-shadow:
+        0 0 14px rgba(0, 240, 255, 0.10),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+
+    transition: var(--mg-transition);
+}
+
+.mg-modal__form button:hover {
+    transform: translateY(-1px);
+    border-color: rgba(0, 240, 255, 0.35);
+    box-shadow:
+        0 0 18px rgba(0, 240, 255, 0.16),
+        0 0 24px rgba(180, 0, 255, 0.10);
+}
+
+.mg-modal__form button:active {
+    transform: scale(0.99);
+}
+
+.mg-modal__status {
+    min-height: 18px;
+    margin-top: 14px;
+    color: rgba(255, 255, 255, 0.70);
+    font-size: 13px;
+    line-height: 1.35;
+}
+
+/* =========================================================
+   TAB LATERAL DEL CHAT EN MODO JUEGO
+========================================================= */
+.mg-dock-tab {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    z-index: 2600;
+
+    width: 46px;
+    height: 160px;
+
+    opacity: 0;
+    pointer-events: none;
+    cursor: pointer;
+
+    transform: translateY(-50%) translateX(100%);
+    transition: transform 0.22s ease, opacity var(--mg-transition), box-shadow var(--mg-transition);
+
+    border: 1px solid rgba(0, 255, 255, 0.28);
+    border-right: none;
+    border-radius: 16px 0 0 16px;
+
+    background: linear-gradient(180deg, rgba(10, 0, 30, 0.96), rgba(35, 0, 60, 0.96));
+    color: #fff;
+
+    box-shadow:
+        0 0 18px rgba(0, 255, 255, 0.14),
+        0 0 26px rgba(255, 0, 255, 0.10);
+}
+
+.mg-dock-tab:hover {
+    box-shadow:
+        0 0 22px rgba(0, 255, 255, 0.22),
+        0 0 30px rgba(255, 0, 255, 0.16);
+}
+
+.mg-dock-tab__label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+
+    color: #00ffff;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 3px;
+}
+
+.mg-unread-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+
+    min-width: 14px;
+    height: 14px;
+    padding: 0 4px;
+    border-radius: 999px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #ff00ff;
+    color: white;
+    font-size: 9px;
+    font-weight: 900;
+
+    box-shadow: 0 0 10px #ff00ff;
+    transition: transform 0.15s ease;
+}
+
+.mg-unread-badge.bump {
+    transform: scale(1.25);
+}
+
+/* =========================================================
+   PANEL DE NOTIFICACIONES
+========================================================= */
+.mg-notification {
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+
+    padding: 14px 14px 12px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.04));
+    box-shadow:
+        0 10px 24px rgba(0, 0, 0, 0.20),
+        inset 0 1px 0 rgba(255, 255, 255, 0.03);
+
+    transition:
+        transform var(--mg-transition),
+        border-color var(--mg-transition),
+        box-shadow var(--mg-transition),
+        background var(--mg-transition);
+}
+
+.mg-notification::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at top right, rgba(0, 255, 255, 0.10), transparent 35%);
+    opacity: 0.8;
+}
+
+.mg-notification:hover {
+    transform: translateY(-2px);
+    border-color: rgba(0, 240, 255, 0.22);
+    background: linear-gradient(180deg, rgba(0, 240, 255, 0.10), rgba(255, 255, 255, 0.05));
+    box-shadow:
+        0 14px 30px rgba(0, 0, 0, 0.28),
+        0 0 14px rgba(0, 240, 255, 0.08);
+}
+
+.mg-notification:active {
+    transform: scale(0.99);
+}
+
+.mg-notification.is-unread {
+    border-color: rgba(0, 240, 255, 0.24);
+    background: linear-gradient(180deg, rgba(0, 240, 255, 0.14), rgba(255, 255, 255, 0.05));
+    box-shadow:
+        0 0 0 1px rgba(0, 240, 255, 0.08),
+        0 0 16px rgba(0, 240, 255, 0.10);
+}
+
+.mg-notification.is-unread::after {
+    content: "";
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #00f0ff;
+    box-shadow: 0 0 10px #00f0ff;
+}
+
+.mg-notification__top {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.mg-notification__icon {
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    border-radius: 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 16px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.mg-notification__content {
+    flex: 1;
+    min-width: 0;
+}
+
+.mg-notification__title {
+    margin-bottom: 4px;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 900;
+    line-height: 1.2;
+}
+
+.mg-notification__text {
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 12px;
+    line-height: 1.45;
+    word-break: break-word;
+}
+
+.mg-notification__time {
+    margin-top: 8px;
+    color: rgba(255, 255, 255, 0.48);
+    font-size: 10px;
+    letter-spacing: 0.2px;
+}
+
+/* Variantes por tipo */
+.mg-notification--message .mg-notification__icon {
+    background: rgba(0, 240, 255, 0.12);
+    border-color: rgba(0, 240, 255, 0.18);
+    box-shadow: 0 0 14px rgba(0, 240, 255, 0.08);
+}
+
+.mg-notification--friend_request .mg-notification__icon {
+    background: rgba(180, 0, 255, 0.16);
+    border-color: rgba(180, 0, 255, 0.22);
+    box-shadow: 0 0 14px rgba(180, 0, 255, 0.08);
+}
+
+.mg-notification--friend_accepted .mg-notification__icon {
+    background: rgba(0, 255, 170, 0.12);
+    border-color: rgba(0, 255, 170, 0.20);
+    box-shadow: 0 0 14px rgba(0, 255, 170, 0.08);
+}
+
+.mg-notification--support .mg-notification__icon {
+    background: rgba(255, 170, 0, 0.14);
+    border-color: rgba(255, 170, 0, 0.20);
+    box-shadow: 0 0 14px rgba(255, 170, 0, 0.08);
+}
+
+/* =========================================================
+   AJUSTES DE NAV
+========================================================= */
+.nav-icon-btn {
+    position: relative;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+@media (max-width: 920px) {
+    .mg-panel {
+        right: 10px;
+        width: min(92vw, 420px);
+    }
+
+    .mg-panel--friends,
+    .mg-panel--notifications {
+        top: 78px;
+        right: 10px;
+    }
+
+    .mg-panel--friends.mg-panel--stacked,
+    .mg-panel--notifications.mg-panel--stacked {
+        right: 10px;
+    }
+}
+
+@media (max-width: 900px) {
+    :root {
+        --mg-panel-w: min(92vw, 440px);
+    }
+
+    .mg-panel {
+        right: 50%;
+        width: var(--mg-panel-w);
+        height: calc(100vh - 96px);
+        transform: translate(50%, 16px);
+    }
+
+    .mg-panel.open {
+        transform: translate(50%, 0);
+    }
+
+    .mg-split {
+        flex-direction: column;
+        height: calc(100% - 96px);
+    }
+
+    .mg-left {
+        width: 100%;
+        max-height: 44%;
+        border-right: none;
+        border-bottom: 1px solid rgba(0, 240, 255, 0.10);
+    }
+
+    .mg-right {
+        width: 100%;
+        min-height: 56%;
+    }
+
+    .game-view #messagesPanel {
+        top: 84px;
+        right: 12px;
+        left: auto;
+
+        width: min(92vw, 390px);
+        min-width: 0;
+        max-width: none;
+        height: min(70vh, 600px);
+    }
+
+    .game-view .mg-dock-tab {
+        width: 42px;
+        height: 132px;
+    }
+
+    .mg-chat-empty h3 {
+        font-size: 18px;
+        line-height: 1.1;
+    }
+}
+
+@media (max-width: 640px) {
+    .mg-modal__card {
+        width: min(96vw, 520px);
+        padding: 18px 16px 16px;
+        border-radius: 18px;
+    }
+
+    .mg-modal__head h3 {
+        font-size: 20px;
+    }
+
+    .mg-modal__form {
+        flex-direction: column;
+    }
+
+    .mg-modal__form button {
+        width: 100%;
+        min-width: 0;
+    }
 }

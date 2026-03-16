@@ -12,7 +12,7 @@ class Command(BaseCommand):
         # Catalogo base usado para alta/actualizacion idempotente.
         juegos_base = [
             {
-                "titulo": "Space Invaders",
+                "titulo": "One Hit Kill",
                 "genero": "Accion",
                 "desarrollador": "MondogoGames",
                 "fecha_lanzamiento": date(2026, 6, 1),

@@ -1,11 +1,13 @@
 from django.urls import path
 from . import views
-from django.contrib.auth import views as auth_views
-
 urlpatterns = [
     path("login/", views.login_view, name="login"),
     path("register/", views.register_view, name="register"),
     path("logout/", views.logout_view, name="logout"),
+    path("password-reset/", views.password_reset_request_view, name="password_reset"),
+    path("password-reset/done/", views.password_reset_done_view, name="password_reset_done"),
+    path("password-reset/confirm/", views.password_reset_confirm_view, name="password_reset_confirm"),
+    path("password-reset/complete/", views.password_reset_complete_view, name="password_reset_complete"),
     path("", views.home_redirect, name="home"),
     path("juego/<str:nombre>/", views.juego, name="juego"),
     path("catalogo/", views.catalogo, name="catalogo"),
@@ -28,6 +30,11 @@ urlpatterns = [
     path("api/friends/request/<int:request_id>/decline/", views.api_friend_request_decline),
     path("api/messages/threads/", views.api_message_threads),
     path("api/messages/thread/<int:user_id>/", views.api_message_thread_detail),
+    path("api/messages/thread/<int:user_id>/mark-read/", views.api_message_thread_mark_read),
     path("api/messages/thread/<int:user_id>/send/", views.api_message_send),
     path("api/messages/unread-count/", views.api_messages_unread_count),
+    path("api/notifications/", views.api_notifications_list),
+    path("api/notifications/unread-count/", views.api_notifications_unread_count),
+    path("api/notifications/mark-all-read/", views.api_notifications_mark_all_read),
+    path("juego/<slug:slug>/", views.jugar, name="jugar"),
     ]   

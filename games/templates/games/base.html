@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MondongoGames</title>
+    <link rel="icon" type="image/svg+xml" href="{% static 'games/favicon.svg' %}">
 
     <link rel="stylesheet" href="{% static 'games/css/messenger_panels.css' %}">
     <link rel="stylesheet" href="{% static 'games/css/dashboard.css' %}?v=20260226-1">
@@ -19,7 +20,9 @@
 <!-- ===== NAVBAR GLOBAL ===== -->
 <nav class="navbar">
     <div class="nav-left">
-        <div class="logo neon-title">MondongoGames</div>
+        <a class="logo neon-title logo-link" href="{% url 'dashboard' %}" aria-label="Volver al Dashboard">
+            MondongoGames
+        </a>
     </div>
 
     <div class="nav-right">
@@ -36,10 +39,11 @@
     
             <span class="nav-vline" aria-hidden="true"></span>
     
-            <button class="nav-icon-btn" type="button" title="Notificaciones" aria-label="Notificaciones">
+            <button class="nav-icon-btn" id="btnNotifications" type="button" title="Notificaciones" aria-label="Notificaciones">
                 <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
                     <path fill="white" d="M12 22a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 22Zm7-6V11a7 7 0 0 0-5-6.71V3a2 2 0 1 0-4 0v1.29A7 7 0 0 0 5 11v5l-2 2v1h18v-1l-2-2Z"/>
                 </svg>
+                <span class="mg-unread-badge" id="mgNotificationsBadge" hidden>0</span>
             </button>
             <!-- ESTE abre el panel -->
             <button class="nav-icon-btn" id="btnOpenContacts" type="button" title="Mensajes" aria-label="Mensajes">
@@ -54,6 +58,7 @@
                 <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
                     <path fill="white" d="M16 11c1.66 0 3-1.57 3-3.5S17.66 4 16 4s-3 1.57-3 3.5S14.34 11 16 11Zm-8 0c1.66 0 3-1.57 3-3.5S9.66 4 8 4 5 5.57 5 7.5 6.34 11 8 11Zm0 2c-2.67 0-8 1.34-8 4v3h10v-3c0-1.32.67-2.5 1.72-3.33C10.96 13.24 9.25 13 8 13Zm8 0c-1.67 0-5 1-5 3v3h14v-3c0-2.21-5.33-3-9-3Z"/>
                 </svg>
+                <span class="mg-unread-badge" id="mgFriendsBadge">0</span>
             </button>
 
     
@@ -64,7 +69,7 @@
         <label class="popup" id="profileMenu">
             <input type="checkbox" id="profileMenuToggle" />
     
-            <div tabindex="0" class="burger avatar">
+            <div tabindex="0" class="burger avatar nav-profile-avatar">
                 {% if current_user_avatar_url %}
                     <img src="{{ current_user_avatar_url }}" class="avatar-img">
                 {% else %}
@@ -115,6 +120,11 @@
 <audio id="hoverCardSound" preload="auto">
     <source src="{{ ui_audio.hover_card }}" type="audio/mpeg">
 </audio>
+
+<audio id="globalMusic" loop preload="metadata">
+    <source src="{% static 'games/sounds/music_fondo_todo.mp3' %}" type="audio/mpeg">
+</audio>
+
 <script>
     /* ===== CERRAR DROPDOWN PERFIL AL CLIC AFUERA ===== */
     const profileToggle = document.getElementById("profileMenuToggle");
@@ -124,9 +134,9 @@
         if (!profileMenu || !profileToggle) return;
         if (!profileMenu.contains(e.target)) profileToggle.checked = false;
     });
-    </script>
-<script>
+</script>
 
+<script>
 /* ===== EDITAR PERFIL ===== */
 const clickEditarPerfil = document.getElementById("clickEditarPerfil");
 clickEditarPerfil.volume = 0.4;
@@ -138,7 +148,7 @@ if (editarPerfilBtn) {
         e.preventDefault();
 
         clickEditarPerfil.currentTime = 0;
-        clickEditarPerfil.play();
+        clickEditarPerfil.play().catch(()=>{});
 
         setTimeout(() => {
             window.location.href = editarPerfilBtn.href;
@@ -156,7 +166,7 @@ const logoutForm = document.getElementById("logoutForm");
 if (cerrarSesionBtn && logoutForm) {
     cerrarSesionBtn.addEventListener("click", () => {
         clickCerrarSesion.currentTime = 0;
-        clickCerrarSesion.play();
+        clickCerrarSesion.play().catch(()=>{});
         setTimeout(() => {
             logoutForm.submit();
         }, 250);
@@ -175,14 +185,23 @@ document.querySelectorAll(".card").forEach(card => {
 
         if (now - lastHoverTime > HOVER_DELAY) {
             hoverSound.currentTime = 0;
-            hoverSound.play();
+            hoverSound.play().catch(()=>{});
             lastHoverTime = now;
         }
     });
 });
 </script>
+
 {% if not disable_realtime_ui %}
 <!-- ===== PANEL MENSAJES (tipo Messenger) ===== -->
+<button
+  type="button"
+  class="mg-dock-tab"
+  id="mgDockTab"
+  aria-label="Abrir chat"
+  title="Abrir chat">
+  <span class="mg-dock-tab__label">CHAT</span>
+</button>
 <aside class="mg-panel" id="messagesPanel" aria-hidden="true">
   <header class="mg-panel__head">
     <div class="mg-panel__title">Chats</div>
@@ -244,7 +263,9 @@ document.querySelectorAll(".card").forEach(card => {
 
   <div class="mg-left__tabs mg-left__tabs--friends">
     <button type="button" class="mg-tab is-active" data-friendtab="friends">Amigos</button>
-    <button type="button" class="mg-tab" data-friendtab="requests">Peticiones</button>
+    <button type="button" class="mg-tab" data-friendtab="requests">Peticiones
+      <span class="mg-tab-badge" id="mgRequestsTabBadge">0</span>
+    </button>
     <button type="button" class="mg-tab mg-tab--primary" id="btnOpenAddFriend">+ Añadir</button>
   </div>
 
@@ -258,6 +279,19 @@ document.querySelectorAll(".card").forEach(card => {
 
     <div class="mg-section-title">Solicitudes enviadas</div>
     <div class="mg-list" id="mgOutgoing"></div>
+  </div>
+</aside>
+
+<!-- ===== PANEL NOTIFICACIONES ===== -->
+<aside class="mg-panel mg-panel--notifications" id="notificationsPanel" aria-hidden="true">
+  <header class="mg-panel__head">
+    <div class="mg-panel__title">Centro de Notificaciones</div>
+    <div class="mg-panel__sub">Mensajes, amistad y actividad reciente</div>
+    <button class="mg-panel__close" id="btnCloseNotifications" type="button">✕</button>
+  </header>
+
+  <div class="mg-list mg-notifications-list" id="mgNotificationsList">
+    <div class="mg-empty">Cargando...</div>
   </div>
 </aside>
 
@@ -277,8 +311,64 @@ document.querySelectorAll(".card").forEach(card => {
     <div class="mg-modal__status" id="mgAddFriendStatus"></div>
   </div>
 </div>
-
-<script src="{% static 'games/js/messenger_panels.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+<script>
+  window.MG_SUPABASE_URL = "{{ SUPABASE_URL|escapejs }}";
+  window.MG_SUPABASE_ANON_KEY = "{{ SUPABASE_ANON_KEY|escapejs }}";
+  window.MG_CURRENT_USER_ID = {{ request.user.id|default:"null" }};
+</script>
+<script src="{% static 'games/js/messenger_panels.js' %}?v=20260311-2" defer></script>
 {% endif %}
+
+<script>
+(function () {
+    const audio = document.getElementById("globalMusic");
+    if (!audio) return;
+
+    const savedVolume = parseFloat(localStorage.getItem("global_music_volume") || "0.12");
+    audio.volume = isNaN(savedVolume) ? 0.12 : savedVolume;
+
+    const savedTime = parseFloat(localStorage.getItem("global_music_time") || "0");
+
+    audio.addEventListener("loadedmetadata", function () {
+        if (!isNaN(savedTime) && savedTime > 0 && savedTime < audio.duration) {
+            audio.currentTime = savedTime;
+        }
+    });
+
+    audio.addEventListener("timeupdate", function () {
+        localStorage.setItem("global_music_time", audio.currentTime);
+    });
+
+    function startMusic() {
+        if (audio.paused) {
+            audio.play().catch(() => {});
+        }
+    }
+
+    window.addEventListener("load", function () {
+        setTimeout(startMusic, 250);
+    });
+
+    document.addEventListener("click", startMusic, { once: true });
+    document.addEventListener("keydown", startMusic, { once: true });
+
+    window.globalMusicControl = {
+        play: startMusic,
+        pause: function () {
+            audio.pause();
+        },
+        stop: function () {
+            audio.pause();
+            audio.currentTime = 0;
+        },
+        setVolume: function (value) {
+            const v = Math.max(0, Math.min(1, parseFloat(value)));
+            audio.volume = v;
+            localStorage.setItem("global_music_volume", v);
+        }
+    };
+})();
+</script>
 </body>
 </html>

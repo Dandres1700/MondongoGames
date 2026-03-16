@@ -1,6 +1,8 @@
 ﻿{% extends "games/base.html" %}
 {% load static %}
 
+{% block body_class %}game-view{% endblock %}
+
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'games/css/juego.css' %}?v=20260226-2">
 {% endblock %}
@@ -8,19 +10,30 @@
 {% block content %}
 <div class="game-page">
     <input type="hidden" id="juegoId" value="{{ juego_id|default:'' }}">
+    <a href="{% url 'dashboard' %}" class="btn back-btn" id="backBtn">&larr; Regresar</a>
     <div class="game-header">
         <h1 class="game-title">{{ nombre }}</h1>
+        {# Boton glitch para activar/desactivar pantalla completa del juego. #}
+        <div class="glitch-checkbox-wrapper game-fullscreen-toggle">
+            <label class="glitch-checkbox-container" for="fullscreenToggle">
+                <input type="checkbox" id="fullscreenToggle" name="fullscreen_toggle">
+                <div class="checkbox-box">
+                    <div class="checkbox-mark"></div>
+                </div>
+                <span class="checkbox-label" data-text="PANTALLA_COMPLETA">PANTALLA_COMPLETA</span>
+            </label>
+        </div>
     </div>
 
     <div class="game-container">
-        <div class="game-screen">
-            {% if nombre|lower == "space invaders" %}
+        <div class="game-screen" id="gameScreen">
+            {% if nombre|lower == "one hit kill" %}
             {# El juego se renderiza en canvas y se controla por JS modular. #}
             <p>Usa el menu con flechas y Enter. Dentro del juego, escribe palabras para destruir enemigos.</p>
             <canvas id="spaceInvadersCanvas" width="1020" height="640"></canvas>
             <script type="module" src="{% static 'games/js/juego_nave/main.js' %}?v=20260226-3"></script>
-            {% elif nombre|lower == "wall blood" %}
-            {# Version web de Wall Blood dentro del canvas. #}
+            {% elif nombre|lower == "wall blood" or nombre|lower == "dungeon spell" %}
+            {# Version web de Dungeon Spell dentro del canvas. #}
             <p>WASD para moverte, click para disparar, P para pausa, ESC para volver al menu.</p>
             <canvas id="wallBloodCanvas" width="1500" height="800"></canvas>
             <script type="module" src="{% static 'games/js/wall_blood/main.js' %}?v=20260226-3"></script>
@@ -29,7 +42,7 @@
             <p>Usa teclado para moverte y atacar. El juego se carga dentro de esta ventana.</p>
             <iframe
                 id="regularShowFistPunchFrame"
-                src="{% static 'games/external/regular_show_fist_punch/content/files.numuki.com/games/regular-show/fist-punch/index.html' %}"
+                src="{% static 'games/external/regular_show_fist_punch/play_supabase_local.html' %}"
                 title="Regular Show: Fist Punch"
                 style="width:100%;max-width:1200px;height:720px;border:0;display:block;margin:0 auto;background:#000;"
                 allowfullscreen>
@@ -39,7 +52,7 @@
             <p>Enfrenta jefes gigantes usando teclado. Carga local del paquete HTML5.</p>
             <iframe
                 id="regularShowBehemothsFrame"
-                src="{% static 'games/external/regular_show_battle_of_the_behemoths/content/emea.iframed.cn.dmti.cloud/content/1155/game/battle-of-the-behemoths/ae/battleofbehemoths-160818/index.html' %}"
+                src="{% static 'games/external/regular_show_battle_of_the_behemoths/play_supabase_local.html' %}"
                 title="Regular Show: Battle of the Behemoths"
                 style="width:100%;max-width:1200px;height:720px;border:0;display:block;margin:0 auto;background:#000;overflow:hidden;"
                 scrolling="no"
@@ -50,134 +63,38 @@
             <p>Usa teclado para controlar al personaje y evitar obstaculos.</p>
             <iframe
                 id="skyStreakerFrame"
-                src="{% static 'games/external/sky_streaker/content/emea.iframed.cn.dmti.cloud/content/20/game/sky-streaker/za/skystreaker-150718-en/index.html' %}?desktop=1&v=20260303-3"
+                src="{% static 'games/external/sky_streaker/play_supabase_local.html' %}"
                 title="Sky Streaker"
                 style="width:640px;max-width:92vw;height:960px;max-height:82vh;border:0;display:block;margin:0 auto;background:#000;"
+                scrolling="no"
                 allowfullscreen>
             </iframe>
             {% elif nombre|lower == "escaping the prison" %}
-            {# Juego Flash integrado con Ruffle para navegadores modernos. #}
             <p>Este titulo usa emulacion Flash (Ruffle) para ejecutarse en PC.</p>
-            <div id="escapingThePrisonHost"
-                 style="width:960px;max-width:96vw;height:640px;max-height:82vh;margin:0 auto;background:#000;overflow:hidden;">
-            </div>
-            <script>
-            (function () {
-                const host = document.getElementById("escapingThePrisonHost");
-                if (!host) return;
-                // SWF local para este titulo.
-                const swfUrl = "{% static 'games/external/escaping_the_prison/content/farm.stickpage.com/escapingtheprisongame.swf' %}";
-
-                const status = document.createElement("div");
-                status.textContent = "Cargando emulador...";
-                status.style.cssText = "display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:#ddd;font:600 16px/1 Arial,sans-serif;";
-                host.appendChild(status);
-
-                function mountPlayer() {
-                    if (typeof window.RufflePlayer === "undefined") return false;
-                    const ruffle = window.RufflePlayer.newest();
-                    const player = ruffle.createPlayer();
-                    player.style.width = "100%";
-                    player.style.height = "100%";
-                    host.innerHTML = "";
-                    host.appendChild(player);
-                    player.load(swfUrl).catch(() => {
-                        host.innerHTML = "<div style='display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:#f88;font:600 15px/1 Arial,sans-serif;'>No se pudo cargar el juego.</div>";
-                    });
-                    return true;
-                }
-
-                // Si Ruffle ya existe, montar de una vez.
-                if (mountPlayer()) return;
-
-                const existing = document.getElementById("ruffle-cdn");
-                if (existing) {
-                    existing.addEventListener("load", mountPlayer, { once: true });
-                    return;
-                }
-
-                const script = document.createElement("script");
-                script.id = "ruffle-cdn";
-                script.src = "https://unpkg.com/@ruffle-rs/ruffle";
-                script.async = true;
-                script.onload = mountPlayer;
-                script.onerror = () => {
-                    host.innerHTML = "<div style='display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:#f88;font:600 15px/1 Arial,sans-serif;'>No se pudo cargar Ruffle.</div>";
-                };
-                document.head.appendChild(script);
-            })();
-            </script>
+            <iframe
+                id="escapingThePrisonFrame"
+                src="{% static 'games/external/escaping_the_prison/play_supabase_local.html' %}"
+                title="Escaping the Prison"
+                style="width:960px;max-width:96vw;height:640px;max-height:82vh;border:0;display:block;margin:0 auto;background:#000;overflow:hidden;"
+                scrolling="no"
+                allowfullscreen>
+            </iframe>
             {% elif nombre|lower == "extreme pamplona" %}
-            {# Juego Flash integrado con Ruffle para navegadores modernos. #}
             <p>Este titulo usa emulacion Flash (Ruffle) para ejecutarse en PC.</p>
-            <div id="extremePamplonaHost"
-                 style="width:960px;max-width:96vw;height:640px;max-height:82vh;margin:0 auto;background:#000;overflow:hidden;">
-            </div>
-            <script>
-            (function () {
-                const host = document.getElementById("extremePamplonaHost");
-                if (!host) return;
-                // Carga remota porque el paquete local no trae todos los assets secundarios.
-                const swfUrlRemote = "https://files.crazygames.com/extreme-pamplona/extreme-pamplona.swf";
-                const swfBaseRemote = "https://files.crazygames.com/extreme-pamplona/";
-                const swfUrlLocal = "{% static 'games/external/extreme_pamplona/content/files.crazygames.com/extreme-pamplona/extreme-pamplona.swf' %}";
-                const swfBaseLocal = "{% static 'games/external/extreme_pamplona/content/files.crazygames.com/extreme-pamplona/' %}";
-
-                const status = document.createElement("div");
-                status.textContent = "Cargando emulador...";
-                status.style.cssText = "display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:#ddd;font:600 16px/1 Arial,sans-serif;";
-                host.appendChild(status);
-
-                function mountPlayer(url, base) {
-                    if (typeof window.RufflePlayer === "undefined") return false;
-                    const ruffle = window.RufflePlayer.newest();
-                    const player = ruffle.createPlayer();
-                    player.style.width = "100%";
-                    player.style.height = "100%";
-                    host.innerHTML = "";
-                    host.appendChild(player);
-                    player.load({
-                        url: url,
-                        base: base,
-                        allowScriptAccess: true,
-                        parameters: {},
-                    }).catch(() => {
-                        if (url === swfUrlRemote) {
-                            // Fallback local por si la red bloquea el host remoto.
-                            mountPlayer(swfUrlLocal, swfBaseLocal);
-                            return;
-                        }
-                        host.innerHTML = "<div style='display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:#f88;font:600 15px/1 Arial,sans-serif;'>No se pudo cargar Extreme Pamplona. Faltan archivos del paquete local.</div>";
-                    });
-                    return true;
-                }
-
-                // Intenta primero remoto y usa local solo como respaldo.
-                if (mountPlayer(swfUrlRemote, swfBaseRemote)) return;
-
-                const existing = document.getElementById("ruffle-cdn");
-                if (existing) {
-                    existing.addEventListener("load", () => mountPlayer(swfUrlRemote, swfBaseRemote), { once: true });
-                    return;
-                }
-
-                const script = document.createElement("script");
-                script.id = "ruffle-cdn";
-                script.src = "https://unpkg.com/@ruffle-rs/ruffle";
-                script.async = true;
-                script.onload = () => mountPlayer(swfUrlRemote, swfBaseRemote);
-                script.onerror = () => {
-                    host.innerHTML = "<div style='display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:#f88;font:600 15px/1 Arial,sans-serif;'>No se pudo cargar Ruffle.</div>";
-                };
-                document.head.appendChild(script);
-            })();
-            </script>
+            <iframe
+                id="extremePamplonaFrame"
+                src="{% static 'games/external/extreme_pamplona/play_supabase_local.html' %}"
+                title="Extreme Pamplona"
+                style="width:960px;max-width:96vw;height:640px;max-height:82vh;border:0;display:block;margin:0 auto;background:#000;overflow:hidden;"
+                scrolling="no"
+                allowfullscreen>
+            </iframe>
             {% elif nombre|lower == "agent p: rebel spy" %}
             {# Juego HTML5 externo integrado via iframe con index_local para evitar bloqueos de dominio. #}
             <p>Usa teclado para moverte y atacar dentro de la base enemiga.</p>
             <iframe
                 id="agentPRebelSpyFrame"
-                src="{% static 'games/external/agent_p_rebel_spy/content/play.disney.com/html5/phf_spl_plt_agentprebelspy/index_local.html' %}"
+                src="{% static 'games/external/agent_p_rebel_spy/play_supabase_local.html' %}"
                 title="Agent P: Rebel Spy"
                 style="width:100%;max-width:1200px;height:720px;border:0;display:block;margin:0 auto;background:#000;overflow:hidden;"
                 scrolling="no"
@@ -193,8 +110,65 @@
                 });
             })();
             </script>
+            {% elif nombre|lower == "bomberman pacman" %}
+            <p>Este titulo usa emulacion Flash (Ruffle) para ejecutarse en PC.</p>
+            <iframe
+                id="bombermanPacmanFrame"
+                src="{% static 'games/external/bomberman_pacman/play_supabase_local.html' %}"
+                title="Bomberman Pacman"
+                style="width:960px;max-width:96vw;height:720px;max-height:82vh;border:0;display:block;margin:0 auto;background:#000;overflow:hidden;"
+                scrolling="no"
+                allowfullscreen>
+            </iframe>
+            {% elif nombre|lower == "haunt the house" %}
+            <p>Este titulo usa emulacion Flash (Ruffle) para ejecutarse en PC.</p>
+            <iframe
+                id="hauntTheHouseFrame"
+                src="{% static 'games/external/haunt_the_house/play_supabase_local.html' %}"
+                title="Haunt the House"
+                loading="lazy"
+                style="width:700px;max-width:96vw;height:525px;max-height:82vh;border:0;display:block;margin:0 auto;background:#000;overflow:hidden;"
+                scrolling="no"
+                allowfullscreen>
+            </iframe>
+            {% elif nombre|lower == "armor mayhem" %}
+            <p>Combate futurista con armaduras y armas pesadas en escenarios de ciencia ficcion.</p>
+            <iframe
+                id="armorMayhemFrame"
+                src="{% static 'games/external/armor_mayhem/play_supabase_local.html' %}"
+                title="Armor Mayhem"
+                style="width:800px;max-width:96vw;height:500px;max-height:82vh;border:0;display:block;margin:0 auto;background:#000;overflow:hidden;"
+                scrolling="no"
+                allowfullscreen>
+            </iframe>
+            {% elif nombre|lower == "bite jacker" %}
+            <p>Shooter arcade de supervivencia contra hordas de infectados.</p>
+            <iframe
+                id="biteJackerFrame"
+                src="{% static 'games/external/bite_jacker/play_supabase_local.html' %}"
+                title="Bite Jacker"
+                style="width:100%;max-width:1200px;height:720px;border:0;display:block;margin:0 auto;background:#000;overflow:hidden;"
+                scrolling="no"
+                allowfullscreen>
+            </iframe>
+            {% elif nombre|lower == "cactus mccoy" %}
+            <p>Plataformas arcade de accion con combate cuerpo a cuerpo y exploracion.</p>
+            <iframe
+                id="cactusMcCoyFrame"
+                src="{% static 'games/external/cactus_mccoy/play_supabase_local.html' %}"
+                title="Cactus McCoy"
+                style="width:100%;max-width:1200px;height:720px;border:0;display:block;margin:0 auto;background:#000;overflow:hidden;"
+                scrolling="no"
+                allowfullscreen>
+            </iframe>
             {% else %}
-            <h2>Aqui ira el juego</h2>
+            <iframe
+                src="{{ juego.public_url }}"
+                width="100%"
+                height="700"
+                frameborder="0"
+                allowfullscreen>
+            </iframe>
             {% endif %}
         </div>
     </div>
@@ -240,6 +214,7 @@ window.registrarPartida = async function (payload) {
         "escaping the prison",
         "extreme pamplona",
         "agent p: rebel spy",
+        "armor mayhem",
     ]);
 
     const gameName = (document.querySelector(".game-title")?.textContent || "").trim().toLowerCase();
@@ -263,8 +238,121 @@ window.registrarPartida = async function (payload) {
     window.addEventListener("beforeunload", reportOpenIfNeeded, { once: true });
 })();
 </script>
+<script>
+(function () {
+    const toggle = document.getElementById("fullscreenToggle");
+    const gameScreen = document.getElementById("gameScreen");
+    if (!toggle || !gameScreen) return;
+
+    // Busca el canvas o iframe real para abrir solo el juego en fullscreen.
+    const fullscreenTarget = gameScreen.querySelector("canvas, iframe");
+    if (!fullscreenTarget) {
+        toggle.disabled = true;
+        return;
+    }
+
+    const fullscreenEnabled = Boolean(
+        document.fullscreenEnabled ||
+        document.webkitFullscreenEnabled ||
+        document.msFullscreenEnabled
+    );
+
+    const getFullscreenElement = () =>
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.msFullscreenElement ||
+        null;
+
+    const requestFullscreen = (element) => {
+        if (element.requestFullscreen) return element.requestFullscreen();
+        if (element.webkitRequestFullscreen) return element.webkitRequestFullscreen();
+        if (element.msRequestFullscreen) return element.msRequestFullscreen();
+        return Promise.reject(new Error("Fullscreen API no disponible"));
+    };
+
+    const exitFullscreen = () => {
+        if (document.exitFullscreen) return document.exitFullscreen();
+        if (document.webkitExitFullscreen) return document.webkitExitFullscreen();
+        if (document.msExitFullscreen) return document.msExitFullscreen();
+        return Promise.resolve();
+    };
+
+    const syncToggle = () => {
+        toggle.checked = getFullscreenElement() === fullscreenTarget;
+    };
+
+    if (!fullscreenEnabled) {
+        toggle.disabled = true;
+        return;
+    }
+
+    // Cuando cambia el checkbox, entra o sale de pantalla completa.
+    toggle.addEventListener("change", async function () {
+        try {
+            if (toggle.checked) {
+                await requestFullscreen(fullscreenTarget);
+            } else if (getFullscreenElement() === fullscreenTarget) {
+                await exitFullscreen();
+            }
+        } catch (error) {
+            toggle.checked = false;
+            console.error("No se pudo cambiar a pantalla completa:", error);
+        }
+    });
+
+    // Mantiene el checkbox sincronizado si el usuario sale con ESC.
+    document.addEventListener("fullscreenchange", syncToggle);
+    document.addEventListener("webkitfullscreenchange", syncToggle);
+    document.addEventListener("msfullscreenchange", syncToggle);
+    syncToggle();
+})();
+</script>
+<script>
+(function () {
+    const btn = document.getElementById("backBtn");
+    if (!btn) return;
+
+    // Datos del juego actual
+    const nombre = (document.querySelector(".game-title")?.textContent || "").trim();
+    const urlDashboard = btn.getAttribute("href") || "/";
+
+    // Intenta tomar la imagen desde localStorage "recientes" si ya existe
+    // (porque tu dashboard guarda {nombre,url,img} al entrar por card)
+    function getImgFromStorage(n) {
+        try {
+        const rec = JSON.parse(localStorage.getItem("recientes")) || [];
+        const found = rec.find(x => (x.nombre || "").trim() === n);
+        return found?.img || "";
+        } catch (e) {
+        return "";
+        }
+    }
+
+    btn.addEventListener("click", function (e) {
+        // ✅ evita back cache raro
+        e.preventDefault();
+
+        try {
+        const img = getImgFromStorage(nombre); // si ya estaba guardada, la conserva
+        const item = {
+            nombre: nombre,
+            url: window.location.href, // o si tienes una URL bonita del juego, úsala
+            img: img
+        };
+
+        let recientes = JSON.parse(localStorage.getItem("recientes")) || [];
+        // quita duplicados
+        recientes = recientes.filter(j => (j.nombre || "").trim() !== nombre);
+        // mete al inicio
+        recientes.unshift(item);
+        // máximo 2
+        if (recientes.length > 2) recientes = recientes.slice(0, 2);
+
+        localStorage.setItem("recientes", JSON.stringify(recientes));
+        } catch (err) {}
+
+        window.location.href = urlDashboard;
+    });
+})();
+</script>
 {% endblock %}
-
-
-
-

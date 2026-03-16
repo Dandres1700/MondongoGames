@@ -1,0 +1,295 @@
+/* ===== DEV DASHBOARD (SaaS tech + cyber) ===== */
+
+    :root{
+    --glass: rgba(10, 14, 28, .58);
+    --stroke: rgba(0, 255, 160, .22);
+    --green: rgba(0, 255, 160, .70);
+    --cyan: rgba(0, 255, 255, .45);
+    --danger: rgba(255, 60, 60, .7);
+
+    --text: rgba(255,255,255,.95);     /* ✅ blanco */
+    --muted: rgba(255,255,255,.75);    /* ✅ blanco suave */
+    }
+
+    /* ===== Sticky footer real (sin perder background) ===== */
+    html, body{ height: 100%; }
+
+    body.dev-body{
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+
+    background:
+        radial-gradient(1200px 600px at 15% 10%, rgba(0,255,160,.08), transparent 55%),
+        radial-gradient(900px 500px at 85% 20%, rgba(0,255,255,.06), transparent 60%),
+        radial-gradient(900px 500px at 70% 90%, rgba(0,180,120,.08), transparent 60%),
+        url("../img/fondo_dash_dev.png");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    }
+
+    /* El contenedor principal empuja el footer abajo */
+    .dev-shell{
+    flex: 1;
+    padding: 26px;
+    margin: 0 auto;
+    padding-top: 63px !important; /* ajusta si tu navbar es grande */
+    color: var(--text);
+    }
+
+    /* ===== Header ===== */
+    .dev-header{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap: 18px;
+    margin-bottom: 18px;
+    padding: 18px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, rgba(0,255,160,.12), rgba(0,255,255,.06));
+    border: 1px solid rgba(0,255,160,.20);
+    box-shadow: 0 0 30px rgba(0,255,160,.08);
+    backdrop-filter: blur(12px);
+    }
+
+    .dev-title .kicker{
+    font-size: 12px;
+    letter-spacing: .25em;
+    color: var(--muted);
+    }
+
+    .dev-title h1{
+    margin: 6px 0 4px;
+    font-size: 26px;
+    letter-spacing: .06em;
+    color: #fff; /* ✅ blanco puro */
+    text-shadow: 0 0 10px rgba(255,255,255,.12);
+    }
+
+    .dev-title .sub{
+    font-size: 13px;
+    color: var(--muted);
+    }
+
+    .dev-actions{
+    display:flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    }
+
+    /* ===== Botones ===== */
+    .neo-btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding: 10px 14px;
+    border-radius: 14px;
+    background: rgba(0,255,160,.10);
+    border: 1px solid rgba(0,255,160,.25);
+    color: #fff; /* ✅ blanco */
+    text-decoration: none;
+    font-weight: 800;
+    letter-spacing: .03em;
+    box-shadow: 0 0 18px rgba(0,255,160,.10);
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    }
+    .neo-btn:hover{
+    transform: translateY(-1px);
+    box-shadow: 0 0 26px rgba(0,255,160,.18);
+    border-color: rgba(0,255,160,.45);
+    }
+    .neo-btn.danger{
+    background: rgba(255,60,60,.12);
+    border-color: rgba(255,60,60,.28);
+    }
+
+    /* ===== Grids ===== */
+    .grid-4{
+    display:grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 14px;
+    }
+    @media (max-width: 1100px){ .grid-4{ grid-template-columns: repeat(2, 1fr);} }
+    @media (max-width: 600px){ .grid-4{ grid-template-columns: 1fr;} }
+
+    .grid-2{
+    display:grid;
+    grid-template-columns: 1.35fr .85fr;
+    gap: 14px;
+    margin-bottom: 14px;
+    }
+    @media (max-width: 1100px){ .grid-2{ grid-template-columns: 1fr; } }
+
+    /* ===== Cards / Panels ===== */
+    .neo-card,
+    .neo-panel{
+    padding: 16px;
+    border-radius: 18px;
+    background: var(--glass);
+    border: 1px solid rgba(0,255,160,.16);
+    box-shadow: 0 0 22px rgba(0,255,160,.08);
+    backdrop-filter: blur(12px);
+    }
+
+    .neo-panel.mega{ padding: 18px; }
+
+    .neo-card .label{
+    font-size: 12px;
+    letter-spacing: .22em;
+    color: var(--muted);  /* ✅ blanco suave */
+    font-weight: 900;
+    }
+    .neo-card .value{
+    font-size: 30px;
+    margin: 10px 0 6px;
+    font-weight: 900;
+    color: #fff;          /* ✅ blanco */
+    text-shadow: none;    /* ✅ más SaaS */
+    }
+    .neo-card .hint{
+    font-size: 13px;
+    color: var(--muted);  /* ✅ blanco suave */
+    }
+
+    .panel-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+    }
+    .panel-head h2{
+    margin:0;
+    font-size: 15px;
+    letter-spacing: .08em;
+    color: #fff;          /* ✅ blanco */
+    }
+
+    /* ===== Chips ===== */
+    .chip{
+    font-size: 11px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(0,255,160,.12);
+    border: 1px solid rgba(0,255,160,.25);
+    color: #fff;
+    letter-spacing: .16em;
+    font-weight: 900;
+    }
+    .chip.green{
+    background: rgba(0,255,160,.12);
+    border-color: rgba(0,255,160,.25);
+    }
+
+    /* ===== Table ===== */
+    .table-wrap{
+    overflow:auto;
+    border-radius: 14px;
+    border: 1px solid rgba(0,255,160,.12);
+    }
+
+    .neo-table{
+    width:100%;
+    border-collapse: collapse;
+    min-width: 760px;
+    background: rgba(0,0,0,.25);
+    }
+    .neo-table thead th{
+    text-align:left;
+    font-size: 12px;
+    letter-spacing: .16em;
+    padding: 12px;
+    color: rgba(255,255,255,.80); /* ✅ blanco suave */
+    border-bottom: 1px solid rgba(0,255,160,.14);
+    }
+    .neo-table tbody td{
+    padding: 12px;
+    border-bottom: 1px solid rgba(0,255,160,.08);
+    color: rgba(255,255,255,.88); /* ✅ */
+    }
+    .neo-table tbody tr:hover{
+    background: rgba(0,255,160,.06);
+    }
+    .neo-table .score{
+    font-weight: 900;
+    color: #fff;          /* ✅ */
+    text-shadow: none;
+    }
+    .empty{
+    padding: 16px !important;
+    text-align:center;
+    color: rgba(255,255,255,.75) !important;
+    }
+
+    /* ===== Terminal ===== */
+    .terminal .console{
+    border-radius: 14px;
+    border: 1px solid rgba(0,255,160,.14);
+    background: rgba(0,0,0,.30);
+    padding: 12px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    line-height: 1.55;
+    }
+    .terminal .line{ color: rgba(255,255,255,.88); }
+    .terminal .p{ color: rgba(255,255,255,.92); font-weight: 900; } /* ✅ blanco */
+    .terminal .v{ color: rgba(255,255,255,.80); } /* ✅ blanco suave */
+    .terminal .sep{
+    height: 1px;
+    background: rgba(0,255,160,.14);
+    margin: 12px 0;
+    }
+
+    /* ===== JSON / tools ===== */
+    .quick-actions{
+    display:flex;
+    gap: 10px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+    }
+
+    .test-json{
+    margin-top: 10px;
+    border-radius: 14px;
+    border: 1px solid rgba(0,255,160,.14);
+    background: rgba(0,0,0,.35);
+    padding: 12px;
+    overflow:auto;
+    color: rgba(255,255,255,.85); /* ✅ */
+    }
+
+    .tools-grid{
+    display:grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    }
+    @media (max-width: 1100px){ .tools-grid{ grid-template-columns: repeat(2, 1fr);} }
+    @media (max-width: 600px){ .tools-grid{ grid-template-columns: 1fr;} }
+
+    .tool-card{
+    display:block;
+    padding: 16px;
+    border-radius: 18px;
+    text-decoration:none;
+    background: linear-gradient(135deg, rgba(0,255,160,.10), rgba(0,255,255,.08));
+    border: 1px solid rgba(0,255,160,.18);
+    box-shadow: 0 0 22px rgba(0,255,160,.08);
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    color: #fff; /* ✅ todo blanco */
+    }
+    .tool-card:hover{
+    transform: translateY(-2px);
+    border-color: rgba(0,255,160,.40);
+    box-shadow: 0 0 30px rgba(0,255,160,.14);
+    }
+    .tool-card .t-title{
+    font-weight: 900;
+    letter-spacing: .06em;
+    margin-bottom: 6px;
+    color: #fff;
+    }
+    .tool-card .t-sub{
+    color: rgba(255,255,255,.75);
+    font-size: 13px;
+    }

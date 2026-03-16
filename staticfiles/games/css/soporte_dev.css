@@ -1,0 +1,240 @@
+.support-shell{
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 16px;
+    color: rgba(240,248,255,.92);
+    padding-top: 65px !important;
+    }
+
+    .support-head{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap: 14px;
+    padding: 18px;
+    border-radius: 18px;
+    background: rgba(10,14,28,.55);
+    border: 1px solid rgba(0,255,160,.18);
+    box-shadow: 0 0 22px rgba(0,255,160,.08);
+    backdrop-filter: blur(12px);
+    margin-bottom: 14px;
+    }
+
+    .support-title .kicker{
+    font-size: 12px;
+    letter-spacing: .22em;
+    opacity: .75;
+    }
+    .support-title h1{
+    margin: 6px 0 6px;
+    font-size: 26px;
+    letter-spacing: .02em;
+    }
+    .support-title .sub{
+    margin: 0;
+    opacity: .75;
+    font-size: 13px;
+    }
+
+    .support-actions{
+    display:flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    }
+
+    .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(0,255,160,.25);
+    background: rgba(0,255,160,.10);
+    color: rgba(240,248,255,.92);
+    text-decoration: none;
+    font-weight: 800;
+    letter-spacing: .02em;
+    cursor: pointer;
+    transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+    }
+    .btn:hover{
+    transform: translateY(-1px);
+    border-color: rgba(0,255,160,.45);
+    box-shadow: 0 0 22px rgba(0,255,160,.14);
+    }
+    .btn.primary{
+    background: rgba(0,255,160,.14);
+    }
+
+    .alerts{ margin-bottom: 14px; display:flex; flex-direction:column; gap: 10px; }
+    .alert{
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: rgba(10,14,28,.55);
+    border: 1px solid rgba(0,255,255,.18);
+    backdrop-filter: blur(10px);
+    }
+
+    .panel{
+    border-radius: 18px;
+    background: rgba(10,14,28,.55);
+    border: 1px solid rgba(0,255,160,.16);
+    box-shadow: 0 0 22px rgba(0,255,160,.08);
+    backdrop-filter: blur(12px);
+    padding: 16px;
+    }
+
+    .panel-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+    }
+    .panel-top h2{
+    margin:0;
+    font-size: 16px;
+    letter-spacing: .06em;
+    }
+
+    .chip{
+    font-size: 11px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(0,255,160,.12);
+    border: 1px solid rgba(0,255,160,.25);
+    letter-spacing: .14em;
+    font-weight: 900;
+    }
+
+    .table-wrap{
+    overflow:auto;
+    border-radius: 14px;
+    border: 1px solid rgba(0,255,160,.12);
+    }
+
+    .support-table{
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 980px;
+    background: rgba(0,0,0,.22);
+    }
+
+    .support-table thead th{
+    text-align:left;
+    font-size: 12px;
+    letter-spacing: .14em;
+    padding: 12px;
+    opacity: .75;
+    border-bottom: 1px solid rgba(0,255,160,.14);
+    }
+
+    .support-table tbody td{
+    padding: 12px;
+    border-bottom: 1px solid rgba(0,255,160,.08);
+    vertical-align: top;
+    }
+
+    .support-table tbody tr:hover{
+    background: rgba(0,255,160,.06);
+    }
+
+    .mono{
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    opacity: .9;
+    }
+
+    .user .u{ font-weight: 900; }
+    .user .e{ font-size: 12px; opacity: .75; margin-top: 2px; }
+
+    .motivo{
+    max-width: 420px;
+    opacity: .9;
+    }
+
+    .row-form{
+    display:flex;
+    gap: 8px;
+    align-items:center;
+    justify-content:flex-end;
+    flex-wrap: wrap;
+    }
+
+    .select{
+    border-radius: 12px;
+    padding: 9px 10px;
+    border: 1px solid rgba(0,255,160,.22);
+    background: rgba(0,0,0,.25);
+    color: rgba(240,248,255,.92);
+    outline: none;
+    }
+
+    .badge{
+    display:inline-flex;
+    align-items:center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: .04em;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.06);
+    }
+
+    .badge-pendiente{
+    border-color: rgba(255, 200, 0, .35);
+    background: rgba(255, 200, 0, .12);
+    }
+
+    .badge-en_proceso{
+    border-color: rgba(0, 255, 255, .35);
+    background: rgba(0, 255, 255, .12);
+    }
+
+    .badge-cerrado{
+    border-color: rgba(0, 255, 160, .35);
+    background: rgba(0, 255, 160, .12);
+    }
+
+    .empty{
+    padding: 16px !important;
+    text-align:center;
+    opacity: .75;
+    }
+
+/* ===== LOGO clickeable con el MISMO NEON ===== */
+.navbar .logo-link{
+  text-decoration: none !important;
+  color: #ff00ff !important;         /* mismo color neon */
+  font-family: 'Orbitron', monospace;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+
+  /* glow igual */
+  text-shadow:
+    0 0 5px #ff00ff,
+    0 0 15px #ff00ff,
+    0 0 30px #ff00ff,
+    0 0 60px #ff00ff;
+
+  animation: neonPulse 2s infinite alternate;
+  display: inline-block;
+}
+
+.navbar .logo-link:visited{
+  color: #ff00ff !important;
+}
+
+.navbar .logo-link:hover{
+  text-decoration: none !important;
+  filter: brightness(1.08);
+}
+
+/* foco teclado bonito */
+.navbar .logo-link:focus-visible{
+  outline: 2px solid #00ffff;
+  outline-offset: 6px;
+  border-radius: 10px;
+}

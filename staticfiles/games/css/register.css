@@ -1,0 +1,714 @@
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Press+Start+2P&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&display=swap');
+
+    @font-face{
+    font-family:'Blanka';
+    src:url('../fonts/Blanka-Regular.otf') format('opentype');
+    font-weight:normal;
+    font-style:normal;
+    }
+
+    @font-face{
+    font-family:'Bit';
+    src:url('../fonts/8-bit Arcade In.ttf') format('truetype');
+    font-weight:normal;
+    font-style:normal;
+    }
+
+    /* ================= GLOBAL ================= */
+    *{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Orbitron', sans-serif;
+    transition: all 0.25s ease;
+    }
+
+    html, body{
+    height:100%;
+    width:100%;
+    margin:0;
+    }
+
+    body{
+    min-height:100dvh;
+    display:flex;
+    flex-direction:column;
+
+    background: linear-gradient(-45deg, #020010, #0b0033, #14004d, #020010);
+    background-size: 400% 400%;
+    animation: gradientMove 10s ease infinite;
+
+    cursor: crosshair;
+    cursor: url('https://ani.cursors-4u.net/cursors/cur-13/cur1145.cur'), auto;
+
+    overflow:hidden;
+    position:relative;
+    }
+
+    @keyframes gradientMove{
+    0%{ background-position:0% 50% }
+    50%{ background-position:100% 50% }
+    100%{ background-position:0% 50% }
+    }
+
+    @keyframes fadeIn{
+    from{ opacity:0 }
+    to{ opacity:1 }
+    }
+
+    /* Scanlines */
+    body::after{
+    content:"";
+    position:fixed;
+    inset:0;
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.02),
+        rgba(255,255,255,0.02) 1px,
+        transparent 2px,
+        transparent 4px
+    );
+    pointer-events:none;
+    z-index:1;
+    }
+
+    /* Radial vignette */
+    body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background: radial-gradient(circle at center, transparent 60%, rgba(0,255,255,0.05));
+    pointer-events:none;
+    z-index:1;
+    }
+
+    /* ================= HERO ================= */
+    .hero{
+    flex:1;
+    min-height:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    width:100%;
+    padding-bottom:12px;
+
+    background:
+        linear-gradient(rgba(5,0,20,0.75), rgba(5,0,20,0.85)),
+        url("/static/games/img/fondo_login.jpg");
+
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+
+    position:relative;
+    z-index:2;
+    }
+
+    /* partículas */
+    .hero::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:url("/static/games/img/particles.png") repeat;
+    opacity:0.05;
+    animation:particlesMove 40s linear infinite;
+    pointer-events:none;
+    }
+
+    @keyframes particlesMove{
+    from{ background-position:0 0 }
+    to{ background-position:1200px 1200px }
+    }
+
+    .hero-content{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:22px;
+    width:100%;
+    }
+
+    /* ================= AUTH BOX ================= */
+    .auth-box{
+    width:min(820px, 90vw);
+    max-height:72vh;
+
+    display:flex;
+    border-radius:25px;
+
+    background:rgba(15,10,35,0.6);
+    backdrop-filter:blur(30px);
+
+    border:1px solid rgba(255,0,255,0.15);
+    box-shadow: 0 0 40px rgba(255,0,255,0.3), 0 0 80px rgba(0,255,255,0.2);
+
+    overflow:visible;
+    position:relative;
+
+    animation: slideUp 0.7s ease, breathe 5s ease-in-out infinite;
+    contain: layout paint;
+    align-items:stretch;
+    }
+
+    .auth-box:hover{
+    transform:scale(1.01);
+    }
+
+    @keyframes slideUp{
+    from{ transform:translateY(40px); opacity:0 }
+    to{ transform:translateY(0); opacity:1 }
+    }
+
+    @keyframes breathe{
+    0%,100%{
+        box-shadow:
+        0 0 40px rgba(255,0,255,0.3),
+        0 0 80px rgba(0,255,255,0.2);
+    }
+    50%{
+        box-shadow:
+        0 0 60px rgba(255,0,255,0.6),
+        0 0 100px rgba(0,255,255,0.4);
+    }
+    }
+
+    /* borde neon animado */
+    .auth-box::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:25px;
+    border:1px solid transparent;
+
+    background:linear-gradient(90deg,#ff00ff,#00f0ff,#ff00ff);
+    background-size:300% 300%;
+    animation:borderFlow 6s linear infinite;
+
+    mask:linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
+    mask-composite:exclude;
+
+    pointer-events:none;
+    }
+
+    @keyframes borderFlow{
+    0%{ background-position:0% 50% }
+    100%{ background-position:300% 50% }
+    }
+
+    /* Línea vertical fija */
+    .auth-box::before{
+    content:"";
+    position:absolute;
+    top:10%;
+    bottom:10%;
+    left:40%;
+    width:2px;
+
+    background: linear-gradient(to bottom, transparent, #00f0ff, #ff00ff, transparent);
+    box-shadow: 0 0 6px #00f0ff, 0 0 12px #ff00ff;
+
+    pointer-events:none;
+    animation: pulseLine 3s infinite alternate;
+    }
+
+    @keyframes pulseLine{
+    from{ opacity:0.6 }
+    to{ opacity:1 }
+    }
+
+    /* ================= LEFT PANEL ================= */
+    .left-panel{
+    width:40%;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    padding:clamp(16px, 1.6vh, 22px);
+    color:white;
+    }
+
+    .left-panel h2{
+    font-family:'Black Ops One', cursive;
+    font-size:26px;
+    color:#00f0ff;
+    margin-bottom:35px;
+    letter-spacing:2px;
+
+    text-shadow:
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px  1px 0 #000,
+        1px  1px 0 #000,
+        0 0 15px #00f0ff,
+        0 0 25px #ff00ff;
+
+    filter:
+        drop-shadow(-1px -1px 0 #000)
+        drop-shadow( 1px -1px 0 #000)
+        drop-shadow(-1px  1px 0 #000)
+        drop-shadow( 1px  1px 0 #000)
+        drop-shadow(0 0 18px currentColor);
+
+    animation: glitch 3s infinite, flicker 2s infinite;
+    }
+
+    @keyframes glitch{
+    0%{ text-shadow:1px 0 #ff00ff,-1px 0 #00f0ff; }
+    25%{ text-shadow:-1px -1px #ff00ff,1px 1px #00f0ff; }
+    50%{ text-shadow:1px 1px #ff00ff,-1px -1px #00f0ff; }
+    75%{ text-shadow:-1px 1px #ff00ff,1px -1px #00f0ff; }
+    100%{ text-shadow:1px 0 #ff00ff,-1px 0 #00f0ff; }
+    }
+
+    @keyframes flicker{
+    0%,18%,22%,25%,53%,57%,100%{ opacity:1 }
+    20%,24%,55%{ opacity:0.4 }
+    }
+
+    .ghost-btn{
+    padding:12px 28px;
+    border:1px solid #00f0ff;
+    color:#00f0ff;
+    background:transparent;
+    border-radius:30px;
+    cursor:pointer;
+    text-decoration:none;
+    transition:0.3s;
+    margin-top:30px;
+    }
+
+    .ghost-btn:hover{
+    box-shadow:0 0 20px #00f0ff;
+    transform:scale(1.05);
+    margin-top:15px;
+    }
+
+    /* ================= RIGHT PANEL ================= */
+    .right-panel{
+    width:60%;
+    padding:clamp(16px, 1.6vh, 24px);
+    color:white;
+    text-align:center;
+    }
+
+    .right-panel h2{
+    font-family:'Black Ops One', cursive;
+    font-size:26px;
+    color:#ff00ff;
+    margin-top:18px;
+    margin-bottom:34px;
+    letter-spacing:2px;
+
+    text-shadow:
+        -2px -2px 0 #000,
+        2px -2px 0 #000,
+        -2px  2px 0 #000,
+        2px  2px 0 #000,
+        0 0 20px #ff00ff;
+
+    filter:
+        drop-shadow(-1px -1px 0 #000)
+        drop-shadow( 1px -1px 0 #000)
+        drop-shadow(-1px  1px 0 #000)
+        drop-shadow( 1px  1px 0 #000)
+        drop-shadow(0 0 18px currentColor);
+
+    animation: glitch 3s infinite, flicker 2s infinite;
+    }
+
+    .right-panel form{
+    margin-top:-10px;
+    }
+
+    .input-group{
+    position:relative;
+    }
+
+    .input-group label{
+    display:block;
+    margin-bottom:6px;
+    font-size:12px;
+    color:#00ffff;
+    letter-spacing:1px;
+    text-align:left;
+    }
+
+    .input-group input{
+    width:100%;
+    padding:13px;
+    margin-bottom:14px;
+    background:rgba(0,0,0,0.75);
+
+    border:2px solid #00ffff;
+    border-radius:6px;
+
+    color:#00ffff;
+    font-size:15px;
+    font-family:'Orbitron', sans-serif;
+
+    box-shadow: inset 0 0 10px #00ffff33;
+    }
+
+    .input-group input:focus{
+    outline:none;
+    border-color:#ff00ff;
+    box-shadow: 0 0 15px #ff00ff, inset 0 0 15px #ff00ff55;
+    transform:scale(1.02);
+    }
+
+    ::placeholder{
+    color:#00ffff55;
+    }
+
+    /* forgot */
+    .forgot{
+    display:block;
+    margin-bottom:20px;
+    font-size:13px;
+    color:#00f0ff;
+    text-decoration:none;
+    transition:0.3s;
+    }
+
+    .forgot:hover{ color:#ff00ff; }
+
+    /* button */
+    .primary-btn{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:6px;
+
+    background:linear-gradient(90deg,#ff00ff,#00ffff,#ff00ff);
+    background-size:300% 100%;
+
+    color:white;
+    cursor:pointer;
+    font-family:'Black Ops One', cursive;
+
+    font-size:11px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+
+    box-shadow: 0 0 6px #ff00ff, 0 0 12px #00ffff;
+    animation: arcadeFlow 4s linear infinite;
+
+    text-shadow:
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px  1px 0 #000,
+        1px  1px 0 #000,
+        0 0 8px #ff00ff;
+
+    filter:
+        drop-shadow(-1px -1px 0 #000)
+        drop-shadow( 1px -1px 0 #000)
+        drop-shadow(-1px  1px 0 #000)
+        drop-shadow( 1px  1px 0 #000)
+        drop-shadow(0 0 8px #ff00ff);
+    }
+
+    .primary-btn:hover{
+    filter:brightness(1.08);
+    box-shadow: 0 0 10px #ff00ff, 0 0 18px #00ffff;
+    }
+
+    @keyframes arcadeFlow{
+    0%{ background-position:0% 50% }
+    100%{ background-position:300% 50% }
+    }
+
+    /* social */
+    .social{
+    text-align:center;
+    margin-top:10px;
+    }
+
+    .social-icons{
+    margin-top:10px;
+    display:flex;
+    justify-content:center;
+    gap:15px;
+    }
+
+    .social-icons div{
+    width:45px;
+    height:45px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+    border:1px solid #00f0ff;
+    color:#00f0ff;
+    cursor:pointer;
+    transition:0.3s;
+    }
+
+    .social-icons div:hover{
+    background:#00f0ff;
+    color:#050010;
+    box-shadow:0 0 20px #00f0ff;
+    }
+
+    /* ================= TÍTULO BANNER ================= */
+    .titulo-banner{
+    width:min(820px, 90vw);
+    margin:0 auto 10px;
+    text-align:center;
+    padding:30px 0 20px;
+    border-radius: 18px; 
+
+    background:transparent;
+    border-bottom:1px solid rgba(255,0,255,0.3);
+    box-shadow: 0 0 40px rgba(255,0,255,0.3), 0 0 80px rgba(0,255,255,0.2);
+    backdrop-filter:blur(10px);
+
+    border-radius:18px;
+    overflow:hidden;
+    position:relative;
+    z-index:2;
+    }
+
+    .titulo-principal{
+    font-family:'Blanka', sans-serif;
+    font-size:3.5rem;
+    letter-spacing:6px;
+    text-transform:uppercase;
+    color:#00f0ff;
+
+    text-shadow:
+        0 0 5px #00f0ff,
+        0 0 15px #00f0ff,
+        0 0 30px rgba(0,240,255,0.6);
+
+    animation: neonPulse 2s infinite alternate;
+    }
+
+    @keyframes neonPulse{
+    from{
+        text-shadow:
+        0 0 5px #ff00ff,
+        0 0 15px #ff00ff,
+        0 0 30px #ff00ff;
+    }
+    to{
+        text-shadow:
+        0 0 10px #ff00ff,
+        0 0 25px #ff00ff,
+        0 0 50px #ff00ff;
+    }
+    }
+
+    .subtitulo{
+    font-size:1.2rem;
+    color:#00f0ff;
+    margin-top:10px;
+    text-shadow:0 0 15px #00f0ff;
+    }
+
+    .frase{
+    font-size:1rem;
+    margin-top:5px;
+    letter-spacing:2px;
+    color:white;
+    }
+
+    /* ================= FOOTER ================= */
+    .site-footer{
+    width:100%;
+    text-align:center;
+    font-family:'Press Start 2P', monospace;
+    font-size:18px;
+    color:#00ffff;
+
+    background:rgba(10,0,20,0.7);
+    padding:18px 10px;
+
+    text-shadow:0 0 5px #00ffff, 0 0 10px #ff00ff;
+    border-top:2px solid #ff00ff;
+
+    margin-top:15px;
+    flex-shrink:0;
+
+    position:relative;
+    z-index:2;
+    }
+
+    /* ================= VOLUME CONTROL ================= */
+    .volume-control{
+    position:fixed;
+    bottom:110px;
+    right:30px;
+    z-index:2000;
+    opacity:0.4;
+    transition:0.3s;
+    }
+
+    .volume-control:hover{ opacity:1; }
+
+    .slider{
+    position:relative;
+    display:flex;
+    align-items:center;
+    }
+
+    .slider .level{
+    appearance:none;
+    writing-mode: bt-lr;
+    -webkit-appearance: slider-vertical;
+
+    width:12px;
+    height:120px;
+
+    background: rgba(30,30,30,0.85);
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,0.1);
+    cursor:pointer;
+    }
+
+    .slider .level::-webkit-slider-thumb{
+    appearance:none;
+    width:12px;
+    height:12px;
+    background:#ffffff;
+    border-radius:50%;
+    box-shadow:0 0 8px #ffffffaa;
+    }
+
+    .slider .level::-moz-range-thumb{
+    width:12px;
+    height:12px;
+    background:#ffffff;
+    border:none;
+    border-radius:50%;
+    }
+
+    .slider .volume{
+    position:absolute;
+    left:-28px;
+    bottom:0;
+    width:18px;
+    color: rgba(255,255,255,0.6);
+    }
+
+    /* ================= PASSWORD TOOLTIP ================= */
+    .password-tooltip{
+    position:absolute;
+    top:50%;
+    left: calc(100% + 14px);
+    transform: translateY(-50%);
+
+    background: linear-gradient(135deg, rgba(20,0,45,0.98), rgba(10,0,25,0.95));
+    border:1.5px solid #ff00ff;
+    border-radius:10px;
+
+    padding:12px 14px;
+    font-size:13.5px;
+    font-weight:500;
+    line-height:1.4;
+    letter-spacing:0.3px;
+
+    color:#ffd6ff;
+    width:max-content;
+    max-width:240px;
+    z-index:100;
+
+    box-shadow: 0 0 12px #ff00ff, 0 0 25px rgba(255,0,255,0.35);
+
+    display:none;
+    white-space:normal;
+    animation: tooltipIn 0.25s ease;
+    }
+
+    .password-tooltip.valid{
+    color:#9cffdf;
+    border-color:#00ff9c;
+    box-shadow: 0 0 12px #00ff9c, 0 0 25px rgba(0,255,156,0.35);
+    }
+
+    /* (si ya tienes esta keyframe en otro CSS/JS, déjala; aquí no la invento para no cambiar comportamiento)
+    @keyframes tooltipIn{
+    from{ opacity:0; transform: translateY(-50%) translateX(-6px); }
+    to{ opacity:1; transform: translateY(-50%) translateX(0); }
+    }
+    */
+
+    /* ================= RESPONSIVE ================= */
+    @media (max-width: 980px){
+    body{ overflow-y:auto; }
+
+    .hero{
+        padding:16px 10px 20px;
+        min-height:auto;
+    }
+
+    .hero-content{
+        width:100%;
+        gap:16px;
+    }
+
+    .titulo-principal{
+        font-size:2.1rem;
+        letter-spacing:2px;
+    }
+
+    .auth-box{
+        width:100%;
+        max-height:none;
+        display:block;
+    }
+
+    .auth-box::before{ display:none; }
+
+    .left-panel,
+    .right-panel{
+        width:100%;
+        padding:18px 16px;
+    }
+
+    .left-panel{
+        border-bottom:1px solid rgba(255,255,255,0.15);
+    }
+
+    .volume-control{
+        right:10px;
+        bottom:90px;
+    }
+
+    .password-tooltip{
+        left:0;
+        top: calc(100% + 6px);
+        transform:none;
+        max-width:100%;
+    }
+    }
+
+    @media (max-width: 560px){
+    .titulo-principal{
+        font-size:1.6rem;
+        letter-spacing:1px;
+    }
+
+    .subtitulo,
+    .frase{
+        font-size:0.9rem;
+    }
+
+    .left-panel h2,
+    .right-panel h2{
+        font-size:20px;
+        margin-bottom:18px;
+    }
+
+    .input-group input{
+        font-size:14px;
+        padding:12px;
+    }
+
+    .site-footer{
+        font-size:13px;
+        padding:12px 8px;
+    }
+    }

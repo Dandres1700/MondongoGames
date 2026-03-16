@@ -1,17 +1,21 @@
-/* ================= PROFILE MENU - UNIVERSE VERSION ================= */
-
+/* =========================================================
+   PROFILE MENU
+   - Contenedor del menú de perfil en navbar
+========================================================= */
 .profile-menu {
     position: relative;
     display: flex;
     align-items: center;
 }
 
-/* ===== POPUP BASE ===== */
-
+/* =========================================================
+   POPUP BASE
+   - Variables visuales del menú desplegable
+========================================================= */
 .popup {
     --burger-bg: #0b0020;
     --burger-color: #ffffff;
-    --burger-diameter: 55px;
+    --burger-diameter: 62px;
     --burger-btn-border-radius: 50%;
     --burger-transition: all 0.2s ease-in-out;
 
@@ -19,91 +23,111 @@
     --nav-border-color: #00ffff;
     --nav-border-width: 1px;
     --nav-border-radius: 12px;
-    --nav-shadow-width: 0 0 25px rgba(0,255,255,0.4);
+    --nav-shadow-width: 0 0 25px rgba(0, 255, 255, 0.4);
 
-    --nav-button-hover-bg: #ff00ff;
-    --nav-button-hover-text-color: #ffffff;
+    --nav-button-hover-bg: rgba(0, 255, 255, 0.1);
+    --nav-button-hover-text-color: #00ffff;
 
     position: relative;
     display: inline-block;
     z-index: 2001;
 }
 
-/* ocultar checkbox */
+/* Oculta el checkbox que controla el popup */
 .popup input {
     display: none;
 }
 
-/* ===== BOTÓN REDONDO ===== */
-
+/* =========================================================
+   BOTÓN REDONDO / BURGER
+   - Botón que abre el dropdown
+========================================================= */
 .burger {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--burger-bg);
+
     width: var(--burger-diameter);
     height: var(--burger-diameter);
     border-radius: var(--burger-btn-border-radius);
-    cursor: pointer;
-    transition: var(--burger-transition);
+
+    background: var(--burger-bg);
     border: 2px solid #00ffff;
     box-shadow: 0 0 15px #00ffff;
+
+    cursor: pointer;
+    transition: var(--burger-transition);
 }
 
-/* glow hover */
+/* Hover del botón */
 .burger:hover {
     transform: scale(1.1);
     box-shadow: 0 0 25px #ff00ff;
 }
 
-/* click */
+/* Estado click */
 .burger:active {
     transform: scale(0.95);
 }
 
-/* ===== DROPDOWN ===== */
+/* =========================================================
+   AVATARES
+   - Avatar general, avatar del nav y avatar dentro del popup
+========================================================= */
+.avatar,
+.nav-avatar,
+.nav-profile-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
 
-.popup-window {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
-    background: var(--nav-bg);
-    border: var(--nav-border-width) solid var(--nav-border-color);
-    border-radius: var(--nav-border-radius);
-    box-shadow: var(--nav-shadow-width);
-    padding: 10px 0;
-    min-width: 180px;
-    z-index: 2000;
-
-    visibility: hidden;
-    opacity: 0;
-    transform: scale(0.9);
-    transition: all 0.2s ease;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    transform-origin: top right;
+    width: 64px;
+    height: 64px;
+    min-width: 64px;
+    min-height: 64px;
+    border-radius: 50%;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-/* título (username) */
-.popup-window legend {
-    padding: 8px 15px;
-    font-size: 12px;
-    color: #00ffff;
-    text-transform: uppercase;
-    font-family: monospace;
-}
-/* ===== AVATAR CYBER ===== */
-
+/* Avatar neon genérico */
 .avatar {
     background: linear-gradient(135deg, #ff00ff, #00ffff);
     color: white;
-    font-weight: 700;
-    font-size: 20px;
     font-family: 'Orbitron', monospace;
-    text-shadow: 0 0 8px rgba(0,0,0,0.4);
+    font-size: 20px;
+    font-weight: 700;
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
     animation: avatarPulse 3s infinite alternate;
 }
 
+/* Avatar usado específicamente dentro del botón popup */
+.popup .burger.avatar.nav-profile-avatar {
+    width: 62px !important;
+    height: 62px !important;
+    min-width: 62px !important;
+    min-height: 62px !important;
+    max-width: 62px !important;
+    max-height: 62px !important;
+    flex: 0 0 62px !important;
+    border-radius: 50% !important;
+    overflow: hidden !important;
+}
+
+/* Imágenes dentro de avatares */
+.avatar-img,
+.nav-avatar .avatar-img,
+.nav-profile-avatar .avatar-img,
+.popup .burger.avatar.nav-profile-avatar .avatar-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+/* Glow animado del avatar */
 @keyframes avatarPulse {
     from {
         box-shadow: 0 0 15px #00ffff;
@@ -112,92 +136,135 @@
         box-shadow: 0 0 25px #ff00ff;
     }
 }
-/* lista */
-.popup-window ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+
+/* =========================================================
+   DROPDOWN
+   - Ventana desplegable del perfil
+========================================================= */
+.popup-window {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 2000;
+
+    min-width: 260px;
+    padding: 12px 0;
+
+    background: var(--nav-bg);
+    border: var(--nav-border-width) solid var(--nav-border-color);
+    border-radius: var(--nav-border-radius);
+    box-shadow: var(--nav-shadow-width);
+
+    visibility: hidden;
+    opacity: 0;
+    transform: scale(0.9);
+    transform-origin: top right;
+    transition: all 0.2s ease;
+
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
 }
 
-/* botones */
-.popup-window ul button {
-    width: 100%;
-    border: none;
-    background: none;
-    color: white;
-    padding: 10px 15px;
-    text-align: left;
-    cursor: pointer;
-    font-family: monospace;
-    transition: 0.2s;
-}
-
-/* hover botón */
-.popup-window ul button:hover {
-    background: var(--nav-button-hover-bg);
-    color: var(--nav-button-hover-text-color);
-}
-
-/* mostrar cuando está activo */
+/* Mostrar dropdown al activar checkbox */
 .popup input:checked ~ .popup-window {
     visibility: visible;
     opacity: 1;
     transform: scale(1);
 }
 
-.menu-link {
-    display: block;
+/* Título del popup, normalmente username */
+.popup-window legend {
     padding: 12px 18px;
-    text-decoration: none;
-    color: white;
-    font-size: 14px;
-    transition: 0.3s;
-}
-
-.menu-link:hover {
-    background: rgba(0, 255, 255, 0.1);
     color: #00ffff;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 14px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
 }
 
-.nav-right{
+/* Lista del menú */
+.popup-window ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* =========================================================
+   LINKS Y BOTONES DEL MENÚ
+========================================================= */
+.menu-link,
+.popup-window ul button {
+    display: block;
+    width: 100%;
+    padding: 14px 20px;
+
+    background: transparent;
+    border: none;
+    color: white;
+
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+
+    font-family: 'Orbitron', sans-serif;
+    font-size: 16px;
+    letter-spacing: 0.5px;
+    transition: 0.2s;
+}
+
+.menu-link:hover,
+.popup-window ul button:hover {
+    background: var(--nav-button-hover-bg);
+    color: var(--nav-button-hover-text-color);
+}
+
+/* =========================================================
+   NAVBAR RIGHT / ICONOS
+========================================================= */
+.nav-right {
     display: flex;
     align-items: center;
     gap: 14px;
 }
 
-.nav-icons{
+.nav-icons {
     display: flex;
     align-items: center;
     gap: 10px;
     padding-right: 10px;
 }
 
-.nav-vline{
+/* Línea divisoria vertical */
+.nav-vline {
+    display: inline-block;
     width: 1px;
     height: 26px;
-    background: rgba(255,255,255,0.18);
-    display: inline-block;
+    background: rgba(255, 255, 255, 0.18);
 }
 
-.nav-icon-btn{
+/* Botones pequeños de iconos */
+.nav-icon-btn {
+    display: grid;
+    place-items: center;
+
     width: 38px;
     height: 38px;
     border: none;
     border-radius: 10px;
-    background: rgba(0,0,0,0.12);
+
+    background: rgba(0, 0, 0, 0.12);
     cursor: pointer;
-    display: grid;
-    place-items: center;
     transition: 0.2s;
 }
 
-.nav-icon-btn:hover{
+.nav-icon-btn:hover {
     transform: translateY(-1px);
-    box-shadow: 0 0 14px rgba(0,255,255,0.35);
-    background: rgba(0,255,255,0.08);
+    background: rgba(0, 255, 255, 0.08);
+    box-shadow: 0 0 14px rgba(0, 255, 255, 0.35);
 }
 
-.nav-icon{
+/* Íconos SVG o imagen */
+.nav-icon {
     width: 18px;
     height: 18px;
 }

@@ -1,7 +1,0 @@
-﻿<fonts>
-	<!-- possible values for sizeType "pt" & "px" -->
-	<font name="Arial" baseSize="60" sizeType="pt" ratioType="1" color="000000" />
-	<font name="RussoOne" baseSize="100" sizeType="pt" ratioType="0.84" color="FFFFFF"/>
-	<font name="RussoOne" baseSize="100" sizeType="pt" ratioType="0.84" color="00ACFF"/>
-	<font name="RussoOne" baseSize="100" sizeType="pt" ratioType="0.84" color="242E3F"/>
-</fonts>

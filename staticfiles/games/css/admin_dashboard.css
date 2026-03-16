@@ -1,0 +1,348 @@
+/* ====== ADMIN CYBERPUNK ====== */
+    :root{
+    --bg1: rgba(8, 10, 20, .70);
+    --glass: rgba(10, 14, 28, .58);
+    --stroke: rgba(0, 255, 255, .18);
+    --neon: rgba(0, 255, 255, .75);
+    --pink: rgba(255, 0, 200, .65);
+    --purple: rgba(160, 80, 255, .65);
+    --danger: rgba(255, 60, 60, .7);
+    --text: rgba(240, 248, 255, .92);
+    --muted: rgba(220, 235, 255, .65);
+    }
+
+    .admin-shell{
+    min-height: 100vh;
+    padding: 17px;
+    margin: 0 auto;
+    color: var(--text);
+    padding-top: 60px;
+    }
+
+    /* Si quieres fondo distinto solo para admin */
+    body{
+    background:
+        radial-gradient(1200px 600px at 20% 10%, rgba(0,255,255,.10), transparent 55%),
+        radial-gradient(900px 500px at 85% 20%, rgba(255,0,200,.08), transparent 60%),
+        radial-gradient(900px 500px at 70% 90%, rgba(160,80,255,.10), transparent 60%),
+        rgba(0,0,0,.65);
+    background-attachment: fixed;
+    }
+
+    .admin-body{
+    background:
+        radial-gradient(1200px 600px at 20% 10%, rgba(0,255,255,.10), transparent 55%),
+        radial-gradient(900px 500px at 85% 20%, rgba(255,0,200,.08), transparent 60%),
+        radial-gradient(900px 500px at 70% 90%, rgba(160,80,255,.10), transparent 60%),
+        url("../img/fondo_dash_admin2.png");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    }
+    .admin-header{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap: 18px;
+    margin-bottom: 18px;
+    padding: 18px 18px 16px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, rgba(0,255,255,.10), rgba(255,0,200,.06));
+    border: 1px solid rgba(0,255,255,.18);
+    box-shadow: 0 0 30px rgba(0,255,255,.08);
+    backdrop-filter: blur(12px);
+    }
+
+    .admin-title .kicker{
+    font-size: 12px;
+    letter-spacing: .25em;
+    color: var(--muted);
+    }
+
+    .admin-title h1{
+    margin: 6px 0 4px;
+    font-size: 28px;
+    letter-spacing: .06em;
+    text-shadow: 0 0 14px rgba(0,255,255,.18);
+    }
+
+    .admin-title .sub{
+    font-size: 13px;
+    color: var(--muted);
+    }
+
+    .admin-actions{
+    display:flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    }
+
+    .neo-btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding: 10px 14px;
+    border-radius: 14px;
+    background: rgba(0,255,255,.10);
+    border: 1px solid rgba(0,255,255,.25);
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 700;
+    letter-spacing: .03em;
+    box-shadow: 0 0 18px rgba(0,255,255,.10);
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    }
+    .neo-btn:hover{
+    transform: translateY(-1px);
+    box-shadow: 0 0 26px rgba(0,255,255,.18);
+    border-color: rgba(0,255,255,.45);
+    }
+    .neo-btn.danger{
+    background: rgba(255, 60, 60, .12);
+    border-color: rgba(255, 60, 60, .28);
+    box-shadow: 0 0 18px rgba(255,60,60,.10);
+    }
+    .neo-btn.danger:hover{
+    border-color: rgba(255, 60, 60, .48);
+    box-shadow: 0 0 26px rgba(255,60,60,.18);
+    }
+
+    .grid-4{
+    display:grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 14px;
+    }
+    @media (max-width: 1100px){
+    .grid-4{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 600px){
+    .grid-4{ grid-template-columns: 1fr; }
+    }
+
+    .neo-card{
+    padding: 16px;
+    border-radius: 18px;
+    background: var(--glass);
+    border: 1px solid rgba(0,255,255,.16);
+    box-shadow: 0 0 22px rgba(0,255,255,.08);
+    backdrop-filter: blur(12px);
+    position: relative;
+    overflow:hidden;
+    }
+    .neo-card::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background: linear-gradient(120deg, rgba(0,255,255,.10), transparent 45%, rgba(255,0,200,.08));
+    opacity:.9;
+    pointer-events:none;
+    }
+    .neo-card .label{
+    position: relative;
+    font-size: 12px;
+    letter-spacing: .22em;
+    color: var(--muted);
+    font-weight: 800;
+    }
+    .neo-card .value{
+    position: relative;
+    font-size: 30px;
+    margin: 10px 0 6px;
+    font-weight: 900;
+    text-shadow: 0 0 14px rgba(0,255,255,.18);
+    }
+    .neo-card .hint{
+    position: relative;
+    font-size: 13px;
+    color: var(--muted);
+    }
+
+    .grid-2{
+    display:grid;
+    grid-template-columns: 1.3fr .9fr;
+    gap: 14px;
+    margin-bottom: 14px;
+    }
+    @media (max-width: 1100px){
+    .grid-2{ grid-template-columns: 1fr; }
+    }
+
+    .neo-panel{
+    padding: 16px;
+    border-radius: 18px;
+    background: var(--glass);
+    border: 1px solid rgba(0,255,255,.16);
+    box-shadow: 0 0 22px rgba(0,255,255,.08);
+    backdrop-filter: blur(12px);
+    }
+
+    .neo-panel.mega{
+    padding: 18px;
+    }
+
+    .panel-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+    }
+    .panel-head h2{
+    margin:0;
+    font-size: 16px;
+    letter-spacing: .08em;
+    }
+
+    .chip{
+    font-size: 11px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(0,255,255,.12);
+    border: 1px solid rgba(0,255,255,.25);
+    color: var(--text);
+    letter-spacing: .16em;
+    font-weight: 800;
+    }
+    .chip.purple{
+    background: rgba(160,80,255,.12);
+    border-color: rgba(160,80,255,.25);
+    }
+    .chip.cyan{
+    background: rgba(0,255,255,.12);
+    border-color: rgba(0,255,255,.25);
+    }
+
+    .table-wrap{
+    overflow:auto;
+    border-radius: 14px;
+    border: 1px solid rgba(0,255,255,.12);
+    }
+
+    .neo-table{
+    width:100%;
+    border-collapse: collapse;
+    min-width: 620px;
+    background: rgba(0,0,0,.25);
+    }
+    .neo-table thead th{
+    text-align:left;
+    font-size: 12px;
+    letter-spacing: .16em;
+    padding: 12px;
+    color: var(--muted);
+    border-bottom: 1px solid rgba(0,255,255,.14);
+    }
+    .neo-table tbody td{
+    padding: 12px;
+    border-bottom: 1px solid rgba(0,255,255,.08);
+    color: rgba(240,248,255,.88);
+    }
+    .neo-table tbody tr:hover{
+    background: rgba(0,255,255,.06);
+    }
+    .neo-table .score{
+    font-weight: 900;
+    color: rgba(0,255,255,.88);
+    text-shadow: 0 0 10px rgba(0,255,255,.14);
+    }
+    .empty{
+    padding: 16px !important;
+    text-align:center;
+    color: var(--muted) !important;
+    }
+
+    .rank-list{
+    display:flex;
+    flex-direction: column;
+    gap: 10px;
+    }
+
+    .rank-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 16px;
+    background: rgba(0,0,0,.20);
+    border: 1px solid rgba(255,0,200,.12);
+    box-shadow: 0 0 20px rgba(255,0,200,.06);
+    }
+    .rank-left{
+    display:flex;
+    align-items:center;
+    gap: 12px;
+    }
+    .rank-num{
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight: 900;
+    background: rgba(255,0,200,.12);
+    border: 1px solid rgba(255,0,200,.22);
+    }
+    .rank-user .u{
+    font-weight: 900;
+    }
+    .rank-user .m{
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+    }
+    .rank-score{
+    font-size: 18px;
+    font-weight: 900;
+    color: rgba(255,0,200,.88);
+    text-shadow: 0 0 12px rgba(255,0,200,.14);
+    }
+
+    .quick-actions{
+    display:flex;
+    gap: 10px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+    }
+
+    .tools-grid{
+    display:grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    }
+    @media (max-width: 1100px){
+    .tools-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 600px){
+    .tools-grid{ grid-template-columns: 1fr; }
+    }
+
+    .tool-card{
+    display:block;
+    padding: 16px;
+    border-radius: 18px;
+    text-decoration:none;
+    background: linear-gradient(135deg, rgba(0,255,255,.10), rgba(160,80,255,.08));
+    border: 1px solid rgba(0,255,255,.18);
+    box-shadow: 0 0 22px rgba(0,255,255,.08);
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    }
+    .tool-card:hover{
+    transform: translateY(-2px);
+    border-color: rgba(0,255,255,.40);
+    box-shadow: 0 0 30px rgba(0,255,255,.14);
+    }
+    .tool-card .t-title{
+    font-weight: 900;
+    letter-spacing: .06em;
+    margin-bottom: 6px;
+    color: #ffffff;           /* 👈 blanco puro */
+    text-shadow: 0 0 8px rgba(255,255,255,.15); /* pequeño glow suave */
+    }
+    .tool-card .t-sub{
+    color: var(--muted);
+    font-size: 13px;
+    color: rgba(255,255,255,.75);
+    }

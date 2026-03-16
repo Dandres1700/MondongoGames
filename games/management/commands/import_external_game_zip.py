@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import shutil
 import zipfile
+from html import escape
 from datetime import date
 from pathlib import Path
 
@@ -18,6 +19,114 @@ def _win_long_path(path: Path) -> str:
     if os.name == "nt" and not raw.startswith("\\\\?\\"):
         return "\\\\?\\" + raw
     return raw
+
+
+def _write_short_route_page(dest: Path, *, entry: str, title: str) -> Path:
+    # Crea una ruta corta y estable: /external/<slug>/play.html
+    # para evitar usar rutas internas enormes del ZIP en las plantillas.
+    entry = (entry or "").strip().replace("\\", "/").lstrip("/")
+    if not entry:
+        raise ValueError("entry vacia")
+
+    play_html = dest / "play.html"
+    safe_title = escape(title or "External Game")
+
+    if entry.lower().endswith(".swf"):
+        content = f"""<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{safe_title}</title>
+  <style>
+    html, body {{
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      background: #000;
+      overflow: hidden;
+    }}
+    #host {{
+      width: 100%;
+      height: 100%;
+    }}
+    #status {{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      color: #ddd;
+      font: 600 16px/1 Arial, sans-serif;
+    }}
+  </style>
+</head>
+<body>
+  <div id="host"><div id="status">Cargando emulador...</div></div>
+  <script>
+  (function () {{
+    var host = document.getElementById("host");
+    if (!host) return;
+    var swfUrl = {entry!r};
+
+    function mountPlayer() {{
+      if (typeof window.RufflePlayer === "undefined") return false;
+      var ruffle = window.RufflePlayer.newest();
+      var player = ruffle.createPlayer();
+      player.style.width = "100%";
+      player.style.height = "100%";
+      host.innerHTML = "";
+      host.appendChild(player);
+      player.load(swfUrl).catch(function () {{
+        host.innerHTML = "<div id='status' style='color:#f88'>No se pudo cargar el juego.</div>";
+      }});
+      return true;
+    }}
+
+    if (mountPlayer()) return;
+
+    var script = document.createElement("script");
+    script.src = "https://unpkg.com/@ruffle-rs/ruffle";
+    script.async = true;
+    script.onload = mountPlayer;
+    script.onerror = function () {{
+      host.innerHTML = "<div id='status' style='color:#f88'>No se pudo cargar Ruffle.</div>";
+    }};
+    document.head.appendChild(script);
+  }})();
+  </script>
+</body>
+</html>
+"""
+    else:
+        content = f"""<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{safe_title}</title>
+  <style>
+    html, body {{
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      background: #000;
+    }}
+  </style>
+</head>
+<body>
+  <noscript>
+    <a href="{escape(entry)}">Abrir juego</a>
+  </noscript>
+  <script>
+    window.location.replace({entry!r});
+  </script>
+</body>
+</html>
+"""
+
+    play_html.write_text(content, encoding="utf-8")
+    return play_html
 
 
 class Command(BaseCommand):
@@ -104,9 +213,11 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(f"Juego {'creado' if created else 'actualizado'}: {title}"))
 
         if detected_entry:
+            short_route_file = _write_short_route_page(dest, entry=detected_entry, title=title)
             # 5) Imprimir snippet para integracion rapida en juego.html.
-            static_entry = f"games/external/{slug}/{detected_entry}"
+            static_entry = f"games/external/{slug}/play.html"
             self.stdout.write(f"Entry detectada: {detected_entry}")
+            self.stdout.write(f"Ruta corta generada: {short_route_file}")
             self.stdout.write("Snippet iframe sugerido para juego.html:")
             self.stdout.write(
                 f"""<iframe src="{{% static '{static_entry}' %}}" title="{title}" """

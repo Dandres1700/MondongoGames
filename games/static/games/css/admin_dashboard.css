@@ -1,348 +1,469 @@
-    /* ====== ADMIN CYBERPUNK ====== */
+/* =========================================================
+    VARIABLES GLOBALES
+    - Aquí se guardan los colores principales del tema
+    - Así puedes cambiar el estilo general desde un solo lugar
+========================================================= */
+:root {
+    --bg1: rgba(8, 10, 20, 0.70);
+    --glass: rgba(10, 14, 28, 0.58);
+    --stroke: rgba(0, 255, 255, 0.18);
+    --neon: rgba(0, 255, 255, 0.75);
+    --pink: rgba(255, 0, 200, 0.65);
+    --purple: rgba(160, 80, 255, 0.65);
+    --danger: rgba(255, 60, 60, 0.70);
+    --text: rgba(240, 248, 255, 0.92);
+    --muted: rgba(220, 235, 255, 0.65);
 
-    :root{
-    --bg1: rgba(8, 10, 20, .70);
-    --glass: rgba(10, 14, 28, .58);
-    --stroke: rgba(0, 255, 255, .18);
-    --neon: rgba(0, 255, 255, .75);
-    --pink: rgba(255, 0, 200, .65);
-    --purple: rgba(160, 80, 255, .65);
-    --danger: rgba(255, 60, 60, .7);
-    --text: rgba(240, 248, 255, .92);
-    --muted: rgba(220, 235, 255, .65);
-    }
+    /* Variables reutilizables para tarjetas y paneles */
+    --panel-bg: var(--glass);
+    --panel-border: 1px solid rgba(0, 255, 255, 0.16);
+    --panel-shadow: 0 0 22px rgba(0, 255, 255, 0.08);
+    --panel-blur: blur(12px);
+    --radius-lg: 18px;
+    --radius-md: 14px;
+    --transition-fast: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
 
-    .admin-shell{
-    min-height: 100vh;
-    padding: 26px;
-    color: var(--text);
-    padding-top: 110px;
-    }
-
-    /* Si quieres fondo distinto solo para admin */
-    body{
+/* =========================================================
+    FONDO GENERAL DEL BODY
+    - Aplica un fondo cyberpunk con luces de color
+    - Se queda fijo al hacer scroll
+========================================================= */
+body {
     background:
-        radial-gradient(1200px 600px at 20% 10%, rgba(0,255,255,.10), transparent 55%),
-        radial-gradient(900px 500px at 85% 20%, rgba(255,0,200,.08), transparent 60%),
-        radial-gradient(900px 500px at 70% 90%, rgba(160,80,255,.10), transparent 60%),
-        rgba(0,0,0,.65);
+        radial-gradient(1200px 600px at 20% 10%, rgba(0, 255, 255, 0.10), transparent 55%),
+        radial-gradient(900px 500px at 85% 20%, rgba(255, 0, 200, 0.08), transparent 60%),
+        radial-gradient(900px 500px at 70% 90%, rgba(160, 80, 255, 0.10), transparent 60%),
+        rgba(0, 0, 0, 0.65);
     background-attachment: fixed;
-    }
+}
 
-    .admin-body{
+/* =========================================================
+    BODY ESPECÍFICO PARA ADMIN
+    - Fondo especial con imagen para la vista admin
+========================================================= */
+.admin-body {
     background:
-        radial-gradient(1200px 600px at 20% 10%, rgba(0,255,255,.10), transparent 55%),
-        radial-gradient(900px 500px at 85% 20%, rgba(255,0,200,.08), transparent 60%),
-        radial-gradient(900px 500px at 70% 90%, rgba(160,80,255,.10), transparent 60%),
+        radial-gradient(1200px 600px at 20% 10%, rgba(0, 255, 255, 0.10), transparent 55%),
+        radial-gradient(900px 500px at 85% 20%, rgba(255, 0, 200, 0.08), transparent 60%),
+        radial-gradient(900px 500px at 70% 90%, rgba(160, 80, 255, 0.10), transparent 60%),
         url("../img/fondo_dash_admin2.png");
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
-    }
-    .admin-header{
-    display:flex;
-    align-items:flex-end;
-    justify-content:space-between;
+}
+
+/* =========================================================
+    CONTENEDOR PRINCIPAL DEL PANEL ADMIN
+    - Da altura mínima, separación interna y color de texto
+========================================================= */
+.admin-shell {
+    min-height: 100vh;
+    margin: 0 auto;
+    padding: 60px 17px 17px;
+    color: var(--text);
+}
+
+/* =========================================================
+    HEADER DEL ADMIN
+    - Caja superior con título y botones de acción
+========================================================= */
+.admin-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
     gap: 18px;
     margin-bottom: 18px;
     padding: 18px 18px 16px;
-    border-radius: 18px;
-    background: linear-gradient(135deg, rgba(0,255,255,.10), rgba(255,0,200,.06));
-    border: 1px solid rgba(0,255,255,.18);
-    box-shadow: 0 0 30px rgba(0,255,255,.08);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, rgba(0, 255, 255, 0.10), rgba(255, 0, 200, 0.06));
+    border: 1px solid rgba(0, 255, 255, 0.18);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.08);
     backdrop-filter: blur(12px);
-    }
+}
 
-    .admin-title .kicker{
+/* Texto pequeño superior del título */
+.admin-title .kicker {
     font-size: 12px;
-    letter-spacing: .25em;
+    letter-spacing: 0.25em;
     color: var(--muted);
-    }
+}
 
-    .admin-title h1{
+/* Título principal */
+.admin-title h1 {
     margin: 6px 0 4px;
     font-size: 28px;
-    letter-spacing: .06em;
-    text-shadow: 0 0 14px rgba(0,255,255,.18);
-    }
+    letter-spacing: 0.06em;
+    text-shadow: 0 0 14px rgba(0, 255, 255, 0.18);
+}
 
-    .admin-title .sub{
+/* Subtítulo o descripción corta */
+.admin-title .sub {
     font-size: 13px;
     color: var(--muted);
-    }
+}
 
-    .admin-actions{
-    display:flex;
+/* Grupo de botones del header */
+.admin-actions {
+    display: flex;
     gap: 10px;
     flex-wrap: wrap;
-    }
+}
 
-    .neo-btn{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
+/* =========================================================
+    BOTONES NEÓN
+    - Botón base reutilizable
+    - Tiene versión normal y danger
+========================================================= */
+.neo-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     padding: 10px 14px;
     border-radius: 14px;
-    background: rgba(0,255,255,.10);
-    border: 1px solid rgba(0,255,255,.25);
+    background: rgba(0, 255, 255, 0.10);
+    border: 1px solid rgba(0, 255, 255, 0.25);
     color: var(--text);
     text-decoration: none;
     font-weight: 700;
-    letter-spacing: .03em;
-    box-shadow: 0 0 18px rgba(0,255,255,.10);
-    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
-    }
-    .neo-btn:hover{
-    transform: translateY(-1px);
-    box-shadow: 0 0 26px rgba(0,255,255,.18);
-    border-color: rgba(0,255,255,.45);
-    }
-    .neo-btn.danger{
-    background: rgba(255, 60, 60, .12);
-    border-color: rgba(255, 60, 60, .28);
-    box-shadow: 0 0 18px rgba(255,60,60,.10);
-    }
-    .neo-btn.danger:hover{
-    border-color: rgba(255, 60, 60, .48);
-    box-shadow: 0 0 26px rgba(255,60,60,.18);
-    }
+    letter-spacing: 0.03em;
+    box-shadow: 0 0 18px rgba(0, 255, 255, 0.10);
+    transition: var(--transition-fast);
+}
 
-    .grid-4{
-    display:grid;
+.neo-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 26px rgba(0, 255, 255, 0.18);
+    border-color: rgba(0, 255, 255, 0.45);
+}
+
+/* Variante roja para acciones peligrosas */
+.neo-btn.danger {
+    background: rgba(255, 60, 60, 0.12);
+    border-color: rgba(255, 60, 60, 0.28);
+    box-shadow: 0 0 18px rgba(255, 60, 60, 0.10);
+}
+
+.neo-btn.danger:hover {
+    border-color: rgba(255, 60, 60, 0.48);
+    box-shadow: 0 0 26px rgba(255, 60, 60, 0.18);
+}
+
+/* =========================================================
+    GRIDS REUTILIZABLES
+    - grid-4: para tarjetas/resúmenes/herramientas
+    - grid-2: para bloques grandes en dos columnas
+========================================================= */
+.grid-4,
+.tools-grid {
+    display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.grid-4 {
+    margin-bottom: 14px;
+}
+
+.tools-grid {
+    gap: 12px;
+}
+
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1.3fr 0.9fr;
     gap: 14px;
     margin-bottom: 14px;
-    }
-    @media (max-width: 1100px){
-    .grid-4{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    }
-    @media (max-width: 600px){
-    .grid-4{ grid-template-columns: 1fr; }
+}
+
+/* Responsive para tablets */
+@media (max-width: 1100px) {
+    .grid-4,
+    .tools-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .neo-card{
+    .grid-2 {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Responsive para móviles */
+@media (max-width: 600px) {
+    .grid-4,
+    .tools-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* =========================================================
+    BASE COMPARTIDA DE TARJETAS Y PANELES
+    - neo-card y neo-panel comparten casi todo el estilo
+========================================================= */
+.neo-card,
+.neo-panel {
     padding: 16px;
-    border-radius: 18px;
-    background: var(--glass);
-    border: 1px solid rgba(0,255,255,.16);
-    box-shadow: 0 0 22px rgba(0,255,255,.08);
-    backdrop-filter: blur(12px);
+    border-radius: var(--radius-lg);
+    background: var(--panel-bg);
+    border: var(--panel-border);
+    box-shadow: var(--panel-shadow);
+    backdrop-filter: var(--panel-blur);
+}
+
+/* Panel grande con un poco más de padding */
+.neo-panel.mega {
+    padding: 18px;
+}
+
+/* =========================================================
+    TARJETA RESUMEN (neo-card)
+    - Lleva brillo decorativo encima
+========================================================= */
+.neo-card {
     position: relative;
-    overflow:hidden;
-    }
-    .neo-card::before{
-    content:"";
-    position:absolute;
-    inset:0;
-    background: linear-gradient(120deg, rgba(0,255,255,.10), transparent 45%, rgba(255,0,200,.08));
-    opacity:.9;
-    pointer-events:none;
-    }
-    .neo-card .label{
+    overflow: hidden;
+}
+
+.neo-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        120deg,
+        rgba(0, 255, 255, 0.10),
+        transparent 45%,
+        rgba(255, 0, 200, 0.08)
+    );
+    opacity: 0.9;
+    pointer-events: none;
+}
+
+/* Textos internos de la tarjeta */
+.neo-card .label,
+.neo-card .value,
+.neo-card .hint {
     position: relative;
+}
+
+.neo-card .label {
     font-size: 12px;
-    letter-spacing: .22em;
+    letter-spacing: 0.22em;
     color: var(--muted);
     font-weight: 800;
-    }
-    .neo-card .value{
-    position: relative;
-    font-size: 30px;
+}
+
+.neo-card .value {
     margin: 10px 0 6px;
+    font-size: 30px;
     font-weight: 900;
-    text-shadow: 0 0 14px rgba(0,255,255,.18);
-    }
-    .neo-card .hint{
-    position: relative;
+    text-shadow: 0 0 14px rgba(0, 255, 255, 0.18);
+}
+
+.neo-card .hint {
     font-size: 13px;
     color: var(--muted);
-    }
+}
 
-    .grid-2{
-    display:grid;
-    grid-template-columns: 1.3fr .9fr;
-    gap: 14px;
-    margin-bottom: 14px;
-    }
-    @media (max-width: 1100px){
-    .grid-2{ grid-template-columns: 1fr; }
-    }
-
-    .neo-panel{
-    padding: 16px;
-    border-radius: 18px;
-    background: var(--glass);
-    border: 1px solid rgba(0,255,255,.16);
-    box-shadow: 0 0 22px rgba(0,255,255,.08);
-    backdrop-filter: blur(12px);
-    }
-
-    .neo-panel.mega{
-    padding: 18px;
-    }
-
-    .panel-head{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
+/* =========================================================
+    ENCABEZADO DE PANELES
+    - Título y elementos secundarios (chips, badges, etc.)
+========================================================= */
+.panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     gap: 10px;
     margin-bottom: 12px;
-    }
-    .panel-head h2{
-    margin:0;
-    font-size: 16px;
-    letter-spacing: .08em;
-    }
+}
 
-    .chip{
+.panel-head h2 {
+    margin: 0;
+    font-size: 16px;
+    letter-spacing: 0.08em;
+}
+
+/* =========================================================
+    CHIPS / ETIQUETAS PEQUEÑAS
+    - Base y variantes por color
+========================================================= */
+.chip {
     font-size: 11px;
     padding: 6px 10px;
     border-radius: 999px;
-    background: rgba(0,255,255,.12);
-    border: 1px solid rgba(0,255,255,.25);
     color: var(--text);
-    letter-spacing: .16em;
+    letter-spacing: 0.16em;
     font-weight: 800;
-    }
-    .chip.purple{
-    background: rgba(160,80,255,.12);
-    border-color: rgba(160,80,255,.25);
-    }
-    .chip.cyan{
-    background: rgba(0,255,255,.12);
-    border-color: rgba(0,255,255,.25);
-    }
+}
 
-    .table-wrap{
-    overflow:auto;
-    border-radius: 14px;
-    border: 1px solid rgba(0,255,255,.12);
-    }
+/* Variante cyan por defecto */
+.chip,
+.chip.cyan {
+    background: rgba(0, 255, 255, 0.12);
+    border: 1px solid rgba(0, 255, 255, 0.25);
+}
 
-    .neo-table{
-    width:100%;
-    border-collapse: collapse;
+/* Variante morada */
+.chip.purple {
+    background: rgba(160, 80, 255, 0.12);
+    border: 1px solid rgba(160, 80, 255, 0.25);
+}
+
+/* =========================================================
+    TABLAS
+    - Contenedor con scroll y tabla estilizada
+========================================================= */
+.table-wrap {
+    overflow: auto;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(0, 255, 255, 0.12);
+}
+
+.neo-table {
+    width: 100%;
     min-width: 620px;
-    background: rgba(0,0,0,.25);
-    }
-    .neo-table thead th{
-    text-align:left;
-    font-size: 12px;
-    letter-spacing: .16em;
-    padding: 12px;
-    color: var(--muted);
-    border-bottom: 1px solid rgba(0,255,255,.14);
-    }
-    .neo-table tbody td{
-    padding: 12px;
-    border-bottom: 1px solid rgba(0,255,255,.08);
-    color: rgba(240,248,255,.88);
-    }
-    .neo-table tbody tr:hover{
-    background: rgba(0,255,255,.06);
-    }
-    .neo-table .score{
-    font-weight: 900;
-    color: rgba(0,255,255,.88);
-    text-shadow: 0 0 10px rgba(0,255,255,.14);
-    }
-    .empty{
-    padding: 16px !important;
-    text-align:center;
-    color: var(--muted) !important;
-    }
+    border-collapse: collapse;
+    background: rgba(0, 0, 0, 0.25);
+}
 
-    .rank-list{
-    display:flex;
+/* Cabecera de tabla */
+.neo-table thead th {
+    padding: 12px;
+    text-align: left;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    color: var(--muted);
+    border-bottom: 1px solid rgba(0, 255, 255, 0.14);
+}
+
+/* Celdas del cuerpo */
+.neo-table tbody td {
+    padding: 12px;
+    color: rgba(240, 248, 255, 0.88);
+    border-bottom: 1px solid rgba(0, 255, 255, 0.08);
+}
+
+/* Efecto hover en filas */
+.neo-table tbody tr:hover {
+    background: rgba(0, 255, 255, 0.06);
+}
+
+/* Valor destacado, por ejemplo puntajes */
+.neo-table .score {
+    font-weight: 900;
+    color: rgba(0, 255, 255, 0.88);
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.14);
+}
+
+/* Celda de estado vacío */
+.empty {
+    padding: 16px !important;
+    text-align: center;
+    color: var(--muted) !important;
+}
+
+/* =========================================================
+    RANKING / LISTA DE USUARIOS
+    - Para top jugadores, top admins, etc.
+========================================================= */
+.rank-list {
+    display: flex;
     flex-direction: column;
     gap: 10px;
-    }
+}
 
-    .rank-item{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
+.rank-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     gap: 12px;
     padding: 12px;
     border-radius: 16px;
-    background: rgba(0,0,0,.20);
-    border: 1px solid rgba(255,0,200,.12);
-    box-shadow: 0 0 20px rgba(255,0,200,.06);
-    }
-    .rank-left{
-    display:flex;
-    align-items:center;
+    background: rgba(0, 0, 0, 0.20);
+    border: 1px solid rgba(255, 0, 200, 0.12);
+    box-shadow: 0 0 20px rgba(255, 0, 200, 0.06);
+}
+
+.rank-left {
+    display: flex;
+    align-items: center;
     gap: 12px;
-    }
-    .rank-num{
+}
+
+/* Número de posición del ranking */
+.rank-num {
     width: 34px;
     height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 12px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
     font-weight: 900;
-    background: rgba(255,0,200,.12);
-    border: 1px solid rgba(255,0,200,.22);
-    }
-    .rank-user .u{
+    background: rgba(255, 0, 200, 0.12);
+    border: 1px solid rgba(255, 0, 200, 0.22);
+}
+
+/* Datos del usuario */
+.rank-user .u {
     font-weight: 900;
-    }
-    .rank-user .m{
+}
+
+.rank-user .m {
+    margin-top: 2px;
     font-size: 12px;
     color: var(--muted);
-    margin-top: 2px;
-    }
-    .rank-score{
+}
+
+/* Puntaje del ranking */
+.rank-score {
     font-size: 18px;
     font-weight: 900;
-    color: rgba(255,0,200,.88);
-    text-shadow: 0 0 12px rgba(255,0,200,.14);
-    }
+    color: rgba(255, 0, 200, 0.88);
+    text-shadow: 0 0 12px rgba(255, 0, 200, 0.14);
+}
 
-    .quick-actions{
-    display:flex;
+/* =========================================================
+    ACCIONES RÁPIDAS
+    - Contenedor para botones secundarios
+========================================================= */
+.quick-actions {
+    display: flex;
     gap: 10px;
     margin-top: 14px;
     flex-wrap: wrap;
-    }
+}
 
-    .tools-grid{
-    display:grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 12px;
-    }
-    @media (max-width: 1100px){
-    .tools-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    }
-    @media (max-width: 600px){
-    .tools-grid{ grid-template-columns: 1fr; }
-    }
-
-    .tool-card{
-    display:block;
+/* =========================================================
+    TARJETAS DE HERRAMIENTAS / ENLACES
+    - Se usan como accesos directos
+========================================================= */
+.tool-card {
+    display: block;
     padding: 16px;
-    border-radius: 18px;
-    text-decoration:none;
-    background: linear-gradient(135deg, rgba(0,255,255,.10), rgba(160,80,255,.08));
-    border: 1px solid rgba(0,255,255,.18);
-    box-shadow: 0 0 22px rgba(0,255,255,.08);
-    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
-    }
-    .tool-card:hover{
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    background: linear-gradient(135deg, rgba(0, 255, 255, 0.10), rgba(160, 80, 255, 0.08));
+    border: 1px solid rgba(0, 255, 255, 0.18);
+    box-shadow: 0 0 22px rgba(0, 255, 255, 0.08);
+    transition: var(--transition-fast);
+}
+
+.tool-card:hover {
     transform: translateY(-2px);
-    border-color: rgba(0,255,255,.40);
-    box-shadow: 0 0 30px rgba(0,255,255,.14);
-    }
-    .tool-card .t-title{
-    font-weight: 900;
-    letter-spacing: .06em;
+    border-color: rgba(0, 255, 255, 0.40);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.14);
+}
+
+/* Título de la herramienta */
+.tool-card .t-title {
     margin-bottom: 6px;
-    color: #ffffff;           /* 👈 blanco puro */
-    text-shadow: 0 0 8px rgba(255,255,255,.15); /* pequeño glow suave */
-    }
-    .tool-card .t-sub{
-    color: var(--muted);
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    color: #fff;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.15);
+}
+
+/* Subtexto de la herramienta */
+.tool-card .t-sub {
     font-size: 13px;
-    color: rgba(255,255,255,.75);
-    }
+    color: rgba(255, 255, 255, 0.75);
+}

@@ -1,3 +1,0 @@
------Comando para usar directamnete la terminal----
-
-python manage.py upload_ui_audio_to_supabase --bucket ui-audio --prefix ui --upsert

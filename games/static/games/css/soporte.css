@@ -1,269 +1,386 @@
-body{
-    background: url("../img/fondo_soporte.png") no-repeat center center fixed;
-    background-size: cover;
+/* =========================
+   SOPORTE (JUGADOR)
+   - Panel más grande
+   - Texto más grande
+   - Footer pegado abajo
+   ========================= */
+
+/* background SOLO para soporte (no uses body{} global aquí) */
+body.support-body{
+  background: url("../img/fondo_soporte.png") no-repeat center center fixed;
+  background-size: cover;
+
+  /* sticky footer real */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
+
+/* El overlay oscuro de dashboard.css sigue activo (body::before).
+   Si quieres que sea un poco más claro en soporte, descomenta esto:
+*/
+/*
+body.support-body::before{
+  background: rgba(0,0,0,0.35);
+}
+*/
+
+/* Contenedor de página:
+   - flex:1 empuja el footer abajo
+   - padding-top usa el alto del navbar (dashboard.css ya define --nav-h) */
 .support-page{
-    min-height: calc(100vh - 80px);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    padding: 40px 16px;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding-top: 26px;      /* antes: calc(var(--nav-h)+26px) */
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-bottom: 24px;
+
+  min-height: 0;
 }
 
+/* =========================
+   CARD PRINCIPAL (más grande)
+   ========================= */
 .support-card{
-    width: min(720px, 100%);
-    background: rgba(0,0,0,0.55);
-    border: 1px solid #00ffff33;
-    border-radius: 18px;
-    padding: 22px;
-    box-shadow: 0 0 24px rgba(0,255,255,0.08);
+  width: min(980px, 100%);         /* antes 720 */
+  background: rgba(0,0,0,0.58);
+  border: 1px solid #00ffff33;
+  border-radius: 22px;
+  padding: 34px;                   /* antes 22 */
+  box-shadow: 0 0 30px rgba(0,255,255,0.10);
+  backdrop-filter: blur(12px);
 }
 
+/* Título + subtítulo más grandes */
 .support-card h1{
-    margin: 0 0 8px;
+  margin: 0 0 10px;
+  font-size: 2.4rem;
+  letter-spacing: .5px;
 }
 
 .muted{
-    opacity: 0.85;
-    margin: 0 0 18px;
+  opacity: 0.90;
+  margin: 0 0 22px;
+  font-size: 1.05rem;
+  line-height: 1.4;
 }
 
-.support-options{
-    display:grid;
-    gap: 10px;
-    margin-bottom: 16px;
-}
+/* =========================
+   Opciones (cards de tipo)
+   ========================= */
 .support-choice{
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-    margin-bottom: 18px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-bottom: 22px;
 }
 
+/* Base */
 .choice-card{
-    position: relative;
-    display: block;
-    cursor: pointer;
-    border-radius: 16px;
-    border: 1px solid #00ffff22;
-    background: rgba(0,0,0,0.28);
-    transition: 0.18s ease;
-    overflow: hidden;
+  position: relative;
+  display: block;
+  cursor: pointer;
+  border-radius: 20px;
+  overflow: hidden;
 }
 
-.choice-card:hover{
-    border-color: #ff00ff55;
-    box-shadow: 0 0 18px rgba(255,0,255,0.20);
-    transform: translateY(-1px);
-}
-
+/* input invisible */
 .choice-card input{
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
 }
 
-.choice-content{
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-    padding: 14px 14px;
-}
-
-.choice-icon{
-    width: 42px;
-    height: 42px;
-    border-radius: 14px;
-    display: grid;
-    place-items: center;
-    border: 1px solid #00ffff22;
-    background: rgba(0,255,255,0.06);
-    font-size: 20px;
-}
-
-.choice-title{
-    font-weight: 700;
-    letter-spacing: 0.3px;
-}
-
-.choice-sub{
-    margin-top: 4px;
-    font-size: 0.9rem;
-    opacity: 0.8;
-    line-height: 1.25;
-}
-
-/* estado seleccionado (cuando el radio está checked) */
-.choice-card:has(input:checked){
-    border-color: #00ffff;
-    box-shadow: 0 0 22px rgba(0,255,255,0.22);
-    background: rgba(0,255,255,0.06);
-}
-
-/* responsive */
-@media (max-width: 720px){
-    .support-choice{
-        grid-template-columns: 1fr;
-    }
-}
-
-.field label{
-    display:block;
-    margin-bottom: 8px;
-    opacity: 0.9;
-}
-
-.field textarea{
-    width: 100%;
-    border-radius: 14px;
-    border: 1px solid #00ffff22;
-    background: rgba(0,0,0,0.35);
-    color: white;
-    padding: 12px;
-    outline: none;
-    resize: vertical;
-}
-
-.actions{
-    display:flex;
-    gap: 12px;
-    align-items:center;
-    margin-top: 16px;
-    flex-wrap: wrap;
-}
-
-.btn-secondary{
-    display:inline-block;
-    padding: 10px 14px;
-    border-radius: 14px;
-    border: 1px solid #ffffff22;
-    text-decoration:none;
-    color: white;
-    opacity: 0.9;
-}
-
-.btn-secondary:hover{
-    opacity: 1;
-}
-
-.hint{
-    margin-top: 12px;
-    font-size: 0.9rem;
-    opacity: 0.75;
-}
-
-.support-choice{
-    display:grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 20px;
-}
-
-.choice-card{
-    position:relative;
-    cursor:pointer;
-}
-
-.choice-card input{
-    position:absolute;
-    inset:0;
-    opacity:0;
-    pointer-events:none;
-}
-
-/* estilo tipo btn-glitch-fill */
+/* estilo "glitch-card" */
 .glitch-card{
-    border-radius:18px;
-    border:1px solid #00ffff55;
-    padding:16px;
-    background:rgba(0,0,0,0.35);
-    transition:0.2s ease;
-    box-shadow:0 0 12px rgba(0,255,255,0.15);
+  border-radius: 20px;
+  border: 1px solid #00ffff55;
+  padding: 20px;
+  background: rgba(0,0,0,0.35);
+  transition: 0.2s ease;
+  box-shadow: 0 0 14px rgba(0,255,255,0.18);
 }
 
 .glitch-card:hover{
-    border-color:#ff00ff;
-    box-shadow:0 0 22px rgba(255,0,255,0.35);
-    transform:translateY(-2px);
+  border-color: #ff00ff;
+  box-shadow: 0 0 24px rgba(255,0,255,0.35);
+  transform: translateY(-2px);
 }
 
-/* texto */
 .glitch-content{
-    display:flex;
-    flex-direction:column;
-    gap:6px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .glitch-title{
-    font-weight:700;
-    letter-spacing:0.5px;
-    font-size:1rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  font-size: 1.15rem;
 }
 
 .glitch-sub{
-    font-size:0.85rem;
-    opacity:0.85;
+  font-size: 0.98rem;
+  opacity: 0.88;
+  line-height: 1.25;
 }
 
 /* estado seleccionado */
 .glitch-card:has(input:checked){
-    border-color:#00ffff;
-    box-shadow:0 0 30px rgba(0,255,255,0.45);
-    background:rgba(0,255,255,0.08);
+  border-color: #00ffff;
+  box-shadow: 0 0 32px rgba(0,255,255,0.45);
+  background: rgba(0,255,255,0.08);
 }
-.hidden{
-    display:none;
+
+/* responsive */
+@media (max-width: 720px){
+  .support-choice{
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================
+   Campos
+   ========================= */
+.field{
+  margin-top: 14px;
+}
+
+.field label{
+  display: block;
+  margin-bottom: 8px;
+  opacity: 0.95;
+  font-size: 1rem;
+}
+
+.field textarea{
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid #00ffff22;
+  background: rgba(0,0,0,0.35);
+  color: white;
+  padding: 14px;
+  outline: none;
+  resize: vertical;
+  font-size: 1rem;
+  min-height: 130px;
 }
 
 select{
-    width:100%;
-    padding:12px;
-    border-radius:14px;
-    border:1px solid #00ffff33;
-    background:rgba(0,0,0,0.35);
-    color:white;
-    outline:none;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid #00ffff33;
+  background: rgba(0,0,0,0.35);
+  color: white;
+  outline: none;
+  font-size: 1rem;
 }
 
-input[type="file"]{
-    margin-top:8px;
-    color:white;
+/* Ocultos */
+.hidden{
+  display: none;
 }
 
-.support-success{
-    margin-top:18px;
-    padding:14px;
-    border-radius:14px;
-    border:1px solid #00ffff;
-    background:rgba(0,255,255,0.08);
-    box-shadow:0 0 18px rgba(0,255,255,0.25);
-}
-
-.support-error{
-    border-color:#ff4d7a;
-    background:rgba(255, 77, 122, 0.1);
-    box-shadow:0 0 18px rgba(255, 77, 122, 0.25);
-}
+/* =========================
+   Upload archivo (botón custom)
+   ========================= */
 .file-upload{
-    display:flex;
-    align-items:center;
-    gap:14px;
-    margin-top:8px;
-    flex-wrap:wrap;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 8px;
+  flex-wrap: wrap;
 }
 
 /* ocultamos el input real */
 .file-upload input[type="file"]{
-    display:none;
+  display: none;
 }
 
 .file-btn{
-    padding:8px 16px;
+  padding: 10px 16px;
 }
 
 .file-name{
-    font-size:0.85rem;
-    opacity:0.85;
-    letter-spacing:0.3px;
+  font-size: 0.95rem;
+  opacity: 0.88;
+  letter-spacing: 0.3px;
+}
+
+/* =========================
+   Acciones (Enviar / Volver)
+   ========================= */
+.actions{
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+.btn-secondary{
+  display: inline-block;
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: 1px solid #ffffff22;
+  text-decoration: none;
+  color: white;
+  opacity: 0.92;
+  font-size: 1rem;
+}
+
+.btn-secondary:hover{
+  opacity: 1;
+}
+
+.hint{
+  margin-top: 12px;
+  font-size: 0.95rem;
+  opacity: 0.78;
+}
+
+/* =========================
+   Mensajes de éxito/error
+   ========================= */
+.support-success{
+  margin-top: 18px;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid #00ffff;
+  background: rgba(0,255,255,0.08);
+  box-shadow: 0 0 18px rgba(0,255,255,0.25);
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.support-error{
+  border-color: #ff4d7a;
+  background: rgba(255, 77, 122, 0.10);
+  box-shadow: 0 0 18px rgba(255, 77, 122, 0.25);
+}
+
+/* =========================
+   Responsive extra
+   ========================= */
+@media (max-width: 720px){
+  .support-page{
+    padding-top: calc(var(--nav-h, 70px) + 18px);
+    align-items: flex-start;
+  }
+
+  .support-card{
+    padding: 22px;
+    border-radius: 18px;
+  }
+
+  .support-card h1{
+    font-size: 1.9rem;
+  }
+
+  .muted{
+    font-size: 1rem;
+  }
+}
+/* =========================
+   UPLOAD ARCHIVO
+   ========================= */
+.file-upload {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.file-upload input[type="file"] {
+    display: none;
+}
+
+.file-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    min-width: 220px;
+}
+
+.file-name {
+    flex: 1 1 260px;
+    min-width: 220px;
+    font-size: 0.95rem;
+    opacity: 0.88;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* =========================
+   ACCIONES
+   ========================= */
+.actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+}
+
+/* Enviar */
+.actions .btn-glitch-fill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    min-width: 190px;
+    margin-left: auto;
+    order: 2;
+}
+
+/* Volver */
+.actions .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    min-width: 120px;
+    order: 1;
+}
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+@media (max-width: 720px) {
+    .file-upload {
+        align-items: flex-start;
+    }
+
+    .file-btn,
+    .file-name {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .file-name {
+        white-space: normal;
+    }
+
+    .actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .actions .btn-glitch-fill,
+    .actions .btn-secondary {
+        width: 100%;
+        min-width: 0;
+        margin-left: 0;
+    }
 }

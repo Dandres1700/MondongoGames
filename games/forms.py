@@ -6,14 +6,15 @@ class EditProfileForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ["username", "first_name", "last_name", "email"]
-        
+
 class ProfileForm(forms.ModelForm):
+    avatar = forms.FileField(
+        required=False,
+        widget=forms.FileInput(attrs={
+            "class": "custom-file",
+            "accept": "image/*"
+        }),
+    )
     class Meta:
         model = Profile
         fields = ["avatar"]
-        widgets = {
-            "avatar": forms.FileInput(attrs={
-                "class": "custom-file",
-                "accept": "image/*"
-            })
-        }

@@ -1,0 +1,227 @@
+/* ================= PROFILE MENU - UNIVERSE VERSION ================= */
+
+.profile-menu {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* ===== POPUP BASE ===== */
+
+.popup {
+    --burger-bg: #0b0020;
+    --burger-color: #ffffff;
+    --burger-diameter: 62px;
+    --burger-btn-border-radius: 50%;
+    --burger-transition: all 0.2s ease-in-out;
+
+    --nav-bg: rgba(10, 0, 30, 0.95);
+    --nav-border-color: #00ffff;
+    --nav-border-width: 1px;
+    --nav-border-radius: 12px;
+    --nav-shadow-width: 0 0 25px rgba(0,255,255,0.4);
+
+    --nav-button-hover-bg: #ff00ff;
+    --nav-button-hover-text-color: #ffffff;
+
+    position: relative;
+    display: inline-block;
+    z-index: 2001;
+}
+
+/* ocultar checkbox */
+.popup input {
+    display: none;
+}
+
+/* ===== BOTÓN REDONDO ===== */
+
+.burger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--burger-bg);
+    width: var(--burger-diameter);
+    height: var(--burger-diameter);
+    border-radius: var(--burger-btn-border-radius);
+    cursor: pointer;
+    transition: var(--burger-transition);
+    border: 2px solid #00ffff;
+    box-shadow: 0 0 15px #00ffff;
+}
+
+/* glow hover */
+.burger:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 25px #ff00ff;
+}
+
+/* click */
+.burger:active {
+    transform: scale(0.95);
+}
+
+/* ===== DROPDOWN ===== */
+
+.popup-window {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: var(--nav-bg);
+    border: var(--nav-border-width) solid var(--nav-border-color);
+    border-radius: var(--nav-border-radius);
+    box-shadow: var(--nav-shadow-width);
+    padding: 12px 0;
+    min-width: 260px;
+    z-index: 2000;
+
+    visibility: hidden;
+    opacity: 0;
+    transform: scale(0.9);
+    transition: all 0.2s ease;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    transform-origin: top right;
+}
+
+/* título (username) */
+.popup-window legend {
+    padding: 12px 18px;
+    font-size: 14px;
+    color: #00ffff;
+    text-transform: uppercase;
+    font-family: 'Orbitron', sans-serif; /* ✅ misma fuente */
+    letter-spacing: 1px;
+}
+/* ===== AVATAR CYBER ===== */
+
+.avatar {
+    background: linear-gradient(135deg, #ff00ff, #00ffff);
+    color: white;
+    font-weight: 700;
+    font-size: 20px;
+    font-family: 'Orbitron', monospace;
+    text-shadow: 0 0 8px rgba(0,0,0,0.4);
+    animation: avatarPulse 3s infinite alternate;
+}
+
+@keyframes avatarPulse {
+    from {
+        box-shadow: 0 0 15px #00ffff;
+    }
+    to {
+        box-shadow: 0 0 25px #ff00ff;
+    }
+}
+/* lista */
+.popup-window ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* botones */
+.popup-window ul button {
+    width: 100%;
+    border: none;
+    background: none;
+    color: white;
+    padding: 10px 15px;
+    text-align: left;
+    cursor: pointer;
+    font-family: monospace;
+    transition: 0.2s;
+}
+
+/* hover botón */
+.popup-window ul button:hover {
+    background: var(--nav-button-hover-bg);
+    color: var(--nav-button-hover-text-color);
+}
+
+/* mostrar cuando está activo */
+.popup input:checked ~ .popup-window {
+    visibility: visible;
+    opacity: 1;
+    transform: scale(1);
+}
+
+.menu-link {
+    display: block;
+    padding: 14px 20px;         
+    text-decoration: none;
+    color: white;
+    font-size: 16px;            
+    font-family: 'Orbitron', sans-serif; 
+    letter-spacing: 0.5px;
+    transition: 0.2s;
+}
+
+.menu-link:hover {
+    background: rgba(0, 255, 255, 0.1);
+    color: #00ffff;
+}
+
+.nav-right{
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.nav-icons{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-right: 10px;
+}
+
+.nav-vline{
+    width: 1px;
+    height: 26px;
+    background: rgba(255,255,255,0.18);
+    display: inline-block;
+}
+
+.nav-icon-btn{
+    width: 38px;
+    height: 38px;
+    border: none;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.12);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: 0.2s;
+}
+
+.nav-icon-btn:hover{
+    transform: translateY(-1px);
+    box-shadow: 0 0 14px rgba(0,255,255,0.35);
+    background: rgba(0,255,255,0.08);
+}
+
+.nav-icon{
+    width: 18px;
+    height: 18px;
+}
+    .popup-window ul button{
+    width: 100%;
+    border: none;
+    background: transparent;
+    color: white;
+
+    padding: 14px 20px;              
+    font-size: 16px;                  
+    font-family: 'Orbitron', sans-serif;
+    letter-spacing: 0.5px;
+
+    text-align: left;
+    cursor: pointer;
+    transition: 0.2s;
+    }
+
+    /* hover igual */
+    .popup-window ul button:hover{
+    background: rgba(0, 255, 255, 0.1);
+    color: #00ffff;
+    }

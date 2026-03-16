@@ -1,13 +1,21 @@
-﻿from django.contrib.auth.models import User
+﻿import os
+
+from django.contrib.auth.models import User
 from django.db import OperationalError, ProgrammingError, models
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
+from supabase import AuthApiError
+
+from supabase_cliente import (
+    create_supabase_admin_auth_client,
+    create_supabase_auth_client,
+)
 
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    avatar = models.ImageField(upload_to="avatars/", default="avatars/default.png")
+    avatar = models.URLField(blank=True, null=True)
 
     def __str__(self):
         return self.user.username
@@ -22,6 +30,58 @@ def create_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def save_profile(sender, instance, **kwargs):
     instance.profile.save()
+
+
+@receiver(post_save, sender=User)
+def sync_supabase_auth_user(sender, instance, created, **kwargs):
+    # Si el usuario se crea desde el admin o por script, replicarlo en Supabase Auth.
+    if not created:
+        return
+
+    email = (instance.email or "").strip().lower()
+    if not email:
+        return
+
+    try:
+        admin_client = create_supabase_admin_auth_client()
+    except RuntimeError:
+        return
+
+    created_in_supabase = False
+    try:
+        admin_client.auth.admin.create_user(
+            {
+                "email": email,
+                "email_confirm": True,
+                "password": "Temp-Reset-Required-123!",
+                "user_metadata": {
+                    "username": instance.username,
+                    "django_user_id": instance.id,
+                    "is_superuser": bool(instance.is_superuser),
+                },
+            }
+        )
+        created_in_supabase = True
+    except AuthApiError as exc:
+        if exc.code not in {"email_exists", "user_already_exists", "conflict"}:
+            return
+
+    if not created_in_supabase:
+        return
+
+    try:
+        anon_client = create_supabase_auth_client()
+        redirect_url = os.getenv(
+            "SUPABASE_RESET_REDIRECT_URL",
+            "http://localhost:8000/password-reset/confirm/",
+        )
+        anon_client.auth.reset_password_for_email(
+            email,
+            options={"redirect_to": redirect_url},
+        )
+    except Exception:
+        # No romper creaci?n local si el email falla.
+        pass
 
 
 class Usuario(models.Model):
@@ -48,14 +108,20 @@ class Juego(models.Model):
     desarrollador = models.CharField(max_length=255)
     fecha_lanzamiento = models.DateField()
 
+    slug = models.CharField(max_length=150, unique=True, blank=True, null=True)
+    storage_folder = models.CharField(max_length=255, blank=True, null=True)
+    entry_file = models.CharField(max_length=255, blank=True, null=True)
+    public_url = models.TextField(blank=True, null=True)
+    portada_url = models.TextField(blank=True, null=True)
+    descripcion = models.TextField(blank=True, null=True)
+    activo = models.BooleanField(default=True)
+
     class Meta:
         db_table = "juego"
         managed = False
 
     def __str__(self):
         return f"{self.id_juego} - {self.titulo}"
-
-
 class Partida(models.Model):
     id_partida = models.AutoField(primary_key=True)
     id_usuario = models.ForeignKey(
@@ -158,3 +224,32 @@ class DirectMessage(models.Model):
 
     class Meta:
         ordering = ["created_at"]
+
+
+#Notificaciones
+
+class Notification(models.Model):
+    TYPE_FRIEND_REQUEST = "friend_request"
+    TYPE_FRIEND_ACCEPTED = "friend_accepted"
+    TYPE_MESSAGE = "message"
+    TYPE_SUPPORT = "support"
+
+    TYPE_CHOICES = [
+        (TYPE_FRIEND_REQUEST, "Solicitud de amistad"),
+        (TYPE_FRIEND_ACCEPTED, "Solicitud aceptada"),
+        (TYPE_MESSAGE, "Mensaje"),
+        (TYPE_SUPPORT, "Soporte"),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
+    type = models.CharField(max_length=30, choices=TYPE_CHOICES)
+    title = models.CharField(max_length=255)
+    text = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.user.username} - {self.title}"

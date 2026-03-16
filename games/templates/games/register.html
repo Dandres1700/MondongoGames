@@ -86,34 +86,19 @@
 <footer class="site-footer">
 <p>© 2026 MondongoGames. Todos los derechos reservados.</p>
 </footer>
-<audio id="registerMusic" loop>
-    <source src="{{ ui_audio.register_bg }}" type="audio/mpeg">
-</audio>
 
 <audio id="hoverSound">
     <source src="{{ ui_audio.mouse_pass }}" type="audio/mpeg">
 </audio>
+
+<audio id="globalMusic" loop preload="metadata">
+    <source src="{% static 'games/sounds/music_fondo_todo.mp3' %}" type="audio/mpeg">
+</audio>
+
 <script>
-    const registerMusic = document.getElementById("registerMusic");
-    const volumeSlider = document.getElementById("volumeSlider");
     const hoverSound = document.getElementById("hoverSound");
+    const slider = document.getElementById("volumeSlider");
 
-    /* volumen inicial */
-    registerMusic.volume = parseFloat(volumeSlider.value);
-
-    /* autoplay seguro */
-    document.addEventListener("click", () => {
-        if (registerMusic.paused) {
-            registerMusic.play().catch(()=>{});
-        }
-    }, { once: true });
-
-    /* cambiar volumen */
-    volumeSlider.addEventListener("input", function(){
-        registerMusic.volume = parseFloat(this.value);
-    });
-
-    /* hover sound */
     hoverSound.volume = 0.75;
 
     const hoverTargets = document.querySelectorAll("input, button, a");
@@ -125,6 +110,52 @@
         });
     });
 </script>
+
+<script>
+(function () {
+    const audio = document.getElementById("globalMusic");
+    const slider = document.getElementById("volumeSlider");
+    if (!audio) return;
+
+    const savedVolume = parseFloat(localStorage.getItem("global_music_volume") || "0.12");
+    audio.volume = isNaN(savedVolume) ? 0.12 : savedVolume;
+
+    const savedTime = parseFloat(localStorage.getItem("global_music_time") || "0");
+
+    audio.addEventListener("loadedmetadata", function () {
+        if (!isNaN(savedTime) && savedTime > 0 && savedTime < audio.duration) {
+            audio.currentTime = savedTime;
+        }
+    });
+
+    audio.addEventListener("timeupdate", function () {
+        localStorage.setItem("global_music_time", audio.currentTime);
+    });
+
+    function startMusic() {
+        if (audio.paused) {
+            audio.play().catch(() => {});
+        }
+    }
+
+    window.addEventListener("load", function () {
+        setTimeout(startMusic, 250);
+    });
+
+    document.addEventListener("click", startMusic, { once: true });
+    document.addEventListener("keydown", startMusic, { once: true });
+
+    if (slider) {
+        slider.value = localStorage.getItem("global_music_volume") || "0.12";
+        slider.addEventListener("input", function () {
+            const v = Math.max(0, Math.min(1, parseFloat(this.value)));
+            audio.volume = v;
+            localStorage.setItem("global_music_volume", v);
+        });
+    }
+})();
+</script>
+
 <script>
     document.addEventListener("DOMContentLoaded", () => {
     
@@ -161,6 +192,6 @@
         });
     
     });
-    </script>
+</script>
 </body>
 </html>

@@ -10,151 +10,140 @@
 
     <header class="admin-header">
         <div class="admin-title">
-        <div class="kicker">CUARTO DE CONTROL</div>
-        <h1>DASHBOARD DEL MONDONGO ADMIN</h1>
-        <div class="sub">Estado del sistema • Gestión • Métricas</div>
+            <div class="kicker">CUARTO DE CONTROL</div>
+            <h1>DASHBOARD DEL MONDONGO ADMIN</h1>
+            <div class="sub">Estado del sistema • Gestión • Métricas</div>
         </div>
 
         <div class="admin-actions">
-        <a class="neo-btn" href="{% url 'dashboard_user' %}">Ver como Jugador</a>
-        <a class="neo-btn danger" href="{% url 'logout' %}">Salir</a>
+            <a class="neo-btn" href="{% url 'dashboard_user' %}">Ver como Jugador</a>
+            <a class="neo-btn danger" href="{% url 'logout' %}">Salir</a>
         </div>
     </header>
 
     <!-- STATS -->
     <section class="grid-4">
         <div class="neo-card">
-        <div class="label">USUARIOS</div>
-        <div class="value">{{ total_users }}</div>
-        <div class="hint">Registrados</div>
+            <div class="label">USUARIOS</div>
+            <div class="value">{{ total_users }}</div>
+            <div class="hint">Registrados</div>
         </div>
 
         <div class="neo-card">
-        <div class="label">ADMINS</div>
-        <div class="value">{{ total_admins }}</div>
-        <div class="hint">Superusuarios</div>
+            <div class="label">ADMINS</div>
+            <div class="value">{{ total_admins }}</div>
+            <div class="hint">Superusuarios</div>
         </div>
 
         <div class="neo-card">
-        <div class="label">JUEGOS</div>
-        <div class="value">{{ total_games }}</div>
-        <div class="hint">Disponibles</div>
+            <div class="label">JUEGOS</div>
+            <div class="value">{{ total_games }}</div>
+            <div class="hint">Disponibles</div>
         </div>
 
         <div class="neo-card">
-        <div class="label">PARTIDAS</div>
-        <div class="value">{{ total_partidas }}</div>
-        <div class="hint">Total jugadas</div>
+            <div class="label">PARTIDAS</div>
+            <div class="value">{{ total_partidas }}</div>
+            <div class="hint">Total jugadas</div>
         </div>
     </section>
 
     <section class="grid-2">
         <!-- Últimas partidas -->
         <div class="neo-panel">
-        <div class="panel-head">
-            <tbody>
-            {% for p in ultimas_partidas %}
-            <tr>
-                <td>#{{ p.id_partida }}</td>
-                <td>{{ p.id_usuario.nombre }}</td>
-                <td>{{ p.id_juego.titulo }}</td>
-                <td class="score">{{ p.score }}</td>
-                <td>{{ p.fecha_partida }}</td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="5" class="empty">No hay partidas todavía.</td></tr>
-            {% endfor %}
-            </tbody>
-            <span class="chip">EN VIVO</span>
-        </div>
+            <div class="panel-head">
+                <h2>Últimas partidas</h2>
+                <span class="chip">EN VIVO</span>
+            </div>
 
-        <div class="table-wrap">
-            <table class="neo-table">
-            <thead>
-                <tr>
-                <th>ID</th>
-                <th>Usuario</th>
-                <th>Juego</th>
-                <th>Score</th>
-                <th>Fecha</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for p in ultimas_partidas %}
-                <tr>
-                <td>#{{ p.id_partida }}</td>
-                <td>{{ p.id_usuario_id }}</td>
-                <td>{{ p.id_juego_id }}</td>
-                <td class="score">{{ p.score }}</td>
-                <td>{{ p.fecha_partida }}</td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="5" class="empty">No hay partidas todavía.</td></tr>
-                {% endfor %}
-            </tbody>
-            </table>
-        </div>
+            <div class="table-wrap">
+                <table class="neo-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Usuario</th>
+                            <th>Juego</th>
+                            <th>Score</th>
+                            <th>Fecha</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for p in ultimas_partidas %}
+                        <tr>
+                            <td>#{{ p.id_partida }}</td>
+                            <td>{{ p.id_usuario_id }}</td>
+                            <td>{{ p.id_juego_id }}</td>
+                            <td class="score">{{ p.score }}</td>
+                            <td>{{ p.fecha_partida }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="5" class="empty">No hay partidas todavía.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- Top jugadores -->
         <div class="neo-panel">
-        <div class="panel-head">
-            <h2>Top Jugadores</h2>
-            <span class="chip purple">RANKING</span>
-        </div>
+            <div class="panel-head">
+                <h2>Top Jugadores</h2>
+                <span class="chip purple">RANKING</span>
+            </div>
 
-        <div class="rank-list">
-            {% for j in top_jugadores %}
-            <div class="rank-item">
-            <div class="rank-left">
-                <div class="rank-num">{{ forloop.counter }}</div>
-                <div class="rank-user">
-                <div class="m">ID: {{ j.id_usuario }} • {{ j.partidas }} partidas</div>
-                <div class="m">{{ j.partidas }} partidas</div>
+            <div class="rank-list">
+                {% for j in top_jugadores %}
+                <div class="rank-item">
+                    <div class="rank-left">
+                        <div class="rank-num">{{ forloop.counter }}</div>
+                        <div class="rank-user">
+                            <div class="m">ID: {{ j.id_usuario }} • {{ j.partidas }} partidas</div>
+                            <div class="m">{{ j.partidas }} partidas</div>
+                        </div>
+                    </div>
+                    <div class="rank-score">{{ j.total_score }}</div>
                 </div>
+                {% empty %}
+                <div class="empty">Aún no hay ranking.</div>
+                {% endfor %}
             </div>
-            <div class="rank-score">{{ j.total_score }}</div>
-            </div>
-            {% empty %}
-            <div class="empty">Aún no hay ranking.</div>
-            {% endfor %}
-        </div>
 
-        <div class="quick-actions">
-            <a class="neo-btn" href="/admin/">Abrir Django Admin</a>
-            <a class="neo-btn" href="{% url 'soporte_admin' %}">Soporte Admin</a>
-            <a class="neo-btn" href="{% url 'soporte_dev' %}">Vista Desarrollador</a>
-        </div>
+            <div class="quick-actions">
+                <a class="neo-btn" href="/admin/">Abrir Django Admin</a>
+                <a class="neo-btn" href="{% url 'soporte_admin' %}">Soporte Admin</a>
+                <a class="neo-btn" href="{% url 'soporte_dev' %}">Vista Desarrollador</a>
+            </div>
         </div>
     </section>
 
     <!-- Gestión rápida -->
     <section class="neo-panel mega">
         <div class="panel-head">
-        <h2>Gestión rápida</h2>
-        <span class="chip cyan">HERRAMIENTAS</span>
+            <h2>Gestión rápida</h2>
+            <span class="chip cyan">HERRAMIENTAS</span>
         </div>
 
         <div class="tools-grid">
-        <a class="tool-card" href="/admin/auth/user/">
-            <div class="t-title">Usuarios</div>
-            <div class="t-sub">Crear, editar, permisos</div>
-        </a>
+            <a class="tool-card" href="/admin/auth/user/">
+                <div class="t-title">Usuarios</div>
+                <div class="t-sub">Crear, editar, permisos</div>
+            </a>
 
-        <a class="tool-card" href="/admin/games/juego/">
-            <div class="t-title">Juegos</div>
-            <div class="t-sub">Alta/baja, edición</div>
-        </a>
+            <a class="tool-card" href="/admin/games/juego/">
+                <div class="t-title">Juegos</div>
+                <div class="t-sub">Alta/baja, edición</div>
+            </a>
 
-        <a class="tool-card" href="/admin/games/partida/">
-            <div class="t-title">Partidas</div>
-            <div class="t-sub">Auditoría y registros</div>
-        </a>
+            <a class="tool-card" href="/admin/games/partida/">
+                <div class="t-title">Partidas</div>
+                <div class="t-sub">Auditoría y registros</div>
+            </a>
 
-        <a class="tool-card" href="/admin/auth/group/">
-            <div class="t-title">Roles (Groups)</div>
-            <div class="t-sub">desarrollador, etc.</div>
-        </a>
+            <a class="tool-card" href="/admin/auth/group/">
+                <div class="t-title">Roles (Groups)</div>
+                <div class="t-sub">desarrollador, etc.</div>
+            </a>
         </div>
     </section>
 

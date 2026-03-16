@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sky Streaker</title>
+  <link rel="preconnect" href="https://mukvhdxlmtjdpbpodfht.supabase.co">
+  <link rel="dns-prefetch" href="https://mukvhdxlmtjdpbpodfht.supabase.co">
+  <style>
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      background: #000;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      color: #ddd;
+      font: 600 16px/1 Arial, sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <noscript>
+    <a href="https://mukvhdxlmtjdpbpodfht.supabase.co/storage/v1/object/public/games/external/sky_streaker/content/emea.iframed.cn.dmti.cloud/content/20/game/sky-streaker/za/skystreaker-150718-en/index2.html?desktop=1&v=20260303-3">Abrir juego</a>
+  </noscript>
+  <div class="status" id="status">Cargando juego...</div>
+  <script>
+    (function () {
+      // Carga el HTML remoto y fuerza base href para rutas relativas.
+      var remoteUrl = "https://mukvhdxlmtjdpbpodfht.supabase.co/storage/v1/object/public/games/external/sky_streaker/content/emea.iframed.cn.dmti.cloud/content/20/game/sky-streaker/za/skystreaker-150718-en/index2.html?desktop=1&v=20260303-3";
+      var cacheKey = "sky_streaker:index2:v1";
+      var status = document.getElementById("status");
+
+      function getBaseHref(url) {
+        var clean = url.split("?")[0];
+        var idx = clean.lastIndexOf("/");
+        return idx === -1 ? clean : clean.slice(0, idx + 1);
+      }
+
+      function injectBase(html, baseHref) {
+        // Parchea CORS para evitar canvas tainted en Phaser.
+        var corsPatch =
+          "<script>(function(){try{if(window.__cors_patched)return;window.__cors_patched=true;var O=window.Image;window.Image=function(w,h){var i=new O(w,h);i.crossOrigin='anonymous';return i;};if(O&&O.prototype){try{O.prototype.crossOrigin='anonymous';}catch(e){}}if(window.Phaser&&window.Phaser.Loader){window.Phaser.Loader.crossOrigin='anonymous';}}catch(e){}})();</" + "script>";
+        var baseTag = "<base href=\"" + baseHref + "\">";
+        var headMatch = html.match(/<head[^>]*>/i);
+        if (headMatch) {
+          return html.replace(/<head[^>]*>/i, headMatch[0] + "\n  " + baseTag + "\n  " + corsPatch);
+        }
+        return baseTag + "\n" + corsPatch + "\n" + html;
+      }
+
+      function renderHtml(html) {
+        var baseHref = getBaseHref(remoteUrl);
+        var finalHtml = injectBase(html, baseHref);
+        document.open();
+        document.write(finalHtml);
+        document.close();
+      }
+
+      // Intenta usar cache de localStorage para acelerar entre sesiones.
+      try {
+        var cached = localStorage.getItem(cacheKey) || sessionStorage.getItem(cacheKey);
+        if (cached && cached.length > 100) {
+          renderHtml(cached);
+          return;
+        }
+      } catch (e) {}
+
+      var fallbackTimer = setTimeout(function () {
+        // Si el remoto tarda demasiado, abre la version local.
+        if (status) status.textContent = "Carga lenta. Abriendo version local...";
+        window.location.replace("play.html");
+      }, 8000);
+
+      fetch(remoteUrl, { cache: "force-cache" })
+        .then(function (res) {
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          return res.text();
+        })
+        .then(function (html) {
+          clearTimeout(fallbackTimer);
+          try { localStorage.setItem(cacheKey, html); } catch (e) {}
+          try { sessionStorage.setItem(cacheKey, html); } catch (e) {}
+          renderHtml(html);
+        })
+        .catch(function (err) {
+          clearTimeout(fallbackTimer);
+          if (status) status.textContent = "No se pudo cargar el juego: " + err.message;
+        });
+    })();
+  </script>
+</body>
+</html>

@@ -5,7 +5,9 @@ from uuid import uuid4
 from typing import Any
 
 from dotenv import load_dotenv
+import httpx
 from supabase import Client, create_client
+from supabase.lib.client_options import SyncClientOptions
 
 # Utilidades de acceso a Supabase (tabla soporte + Storage de avatar/capturas).
 # Carga .env del proyecto de forma deterministica (independiente del CWD).
@@ -32,6 +34,34 @@ def get_supabase_client() -> Client:
 
     _supabase_client = create_client(url, key)
     return _supabase_client
+
+
+def create_supabase_auth_client() -> Client:
+    # Crea un cliente nuevo por request para evitar sesiones compartidas.
+    url = os.environ.get("SUPABASE_URL", "")
+    key = os.environ.get("SUPABASE_ANON_KEY") or os.environ.get("SUPABASE_KEY", "")
+    if not url or not key:
+        raise RuntimeError(
+            "SUPABASE_URL y SUPABASE_ANON_KEY (o SUPABASE_KEY) deben estar configuradas en .env"
+        )
+    # Timeout corto para evitar cuelgues en requests de Auth.
+    http_client = httpx.Client(timeout=10.0)
+    options = SyncClientOptions(httpx_client=http_client)
+    return create_client(url, key, options)
+
+
+def create_supabase_admin_auth_client() -> Client:
+    # Cliente admin para crear usuarios en Supabase Auth (service role).
+    url = os.environ.get("SUPABASE_URL", "")
+    key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
+    if not url or not key:
+        raise RuntimeError(
+            "SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY deben estar configuradas en .env"
+        )
+    # Timeout corto para operaciones admin.
+    http_client = httpx.Client(timeout=10.0)
+    options = SyncClientOptions(httpx_client=http_client)
+    return create_client(url, key, options)
 
 
 def insert_support_ticket(payload: dict[str, Any], table_name: str | None = None):
@@ -140,9 +170,9 @@ def upload_profile_avatar(
     bucket_name: str | None = None,
 ) -> tuple[str, str]:
     # Sube avatar de perfil y retorna (path_en_bucket, public_url).
-    bucket = bucket_name or os.environ.get("SUPABASE_STORAGE_BUCKET_AVATARS", "avatars")
+    bucket = bucket_name or os.environ.get("SUPABASE_STORAGE_BUCKET_PROFILE", "img_profile")
     ext = posixpath.splitext(original_name or "")[1].lower() or ".bin"
-    object_path = f"profiles/{int(user_id)}/{uuid4().hex}{ext}"
+    object_path = f"avatars/{int(user_id)}/{uuid4().hex}{ext}"
     public_url = _upload_public_asset(
         bucket=bucket,
         object_path=object_path,
@@ -150,3 +180,30 @@ def upload_profile_avatar(
         content_type=content_type,
     )
     return object_path, public_url
+
+
+def delete_profile_avatar_from_url(
+    *,
+    public_url: str | None,
+    bucket_name: str | None = None,
+) -> bool:
+    # Elimina el avatar anterior si pertenece al bucket configurado.
+    if not public_url:
+        return False
+
+    bucket = bucket_name or os.environ.get("SUPABASE_STORAGE_BUCKET_PROFILE", "img_profile")
+    marker = f"/storage/v1/object/public/{bucket}/"
+    if marker not in public_url:
+        return False
+
+    object_path = public_url.split(marker, 1)[-1].strip("/")
+    if "?" in object_path:
+        object_path = object_path.split("?", 1)[0]
+    if not object_path:
+        return False
+    if not object_path.startswith("avatars/"):
+        return False
+
+    client = get_supabase_client()
+    client.storage.from_(bucket).remove([object_path])
+    return True

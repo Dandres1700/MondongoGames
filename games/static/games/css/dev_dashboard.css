@@ -1,294 +1,406 @@
-    /* ===== DEV DASHBOARD (SaaS tech + cyber) ===== */
+/* =========================================================
+   VARIABLES GLOBALES
+   - Colores y estilos base del dashboard developer
+========================================================= */
+:root {
+    --glass: rgba(10, 14, 28, 0.58);
+    --stroke: rgba(0, 255, 160, 0.22);
+    --green: rgba(0, 255, 160, 0.70);
+    --cyan: rgba(0, 255, 255, 0.45);
+    --danger: rgba(255, 60, 60, 0.7);
 
-    :root{
-    --glass: rgba(10, 14, 28, .58);
-    --stroke: rgba(0, 255, 160, .22);
-    --green: rgba(0, 255, 160, .70);
-    --cyan: rgba(0, 255, 255, .45);
-    --danger: rgba(255, 60, 60, .7);
+    --text: rgba(255, 255, 255, 0.95);
+    --muted: rgba(255, 255, 255, 0.75);
 
-    --text: rgba(255,255,255,.95);     /* ✅ blanco */
-    --muted: rgba(255,255,255,.75);    /* ✅ blanco suave */
-    }
+    --radius-lg: 18px;
+    --radius-md: 14px;
 
-    /* ===== Sticky footer real (sin perder background) ===== */
-    html, body{ height: 100%; }
+    --panel-border: 1px solid rgba(0, 255, 160, 0.16);
+    --panel-shadow: 0 0 22px rgba(0, 255, 160, 0.08);
+    --panel-blur: blur(12px);
 
-    body.dev-body{
+    --transition-fast: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+/* =========================================================
+   BASE DEL DOCUMENTO
+   - Permite footer pegado abajo con layout flex
+========================================================= */
+html,
+body {
+    height: 100%;
+}
+
+/* =========================================================
+   BODY DEL DASHBOARD DEV
+   - Fondo principal con imagen + luces decorativas
+========================================================= */
+body.dev-body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
 
     background:
-        radial-gradient(1200px 600px at 15% 10%, rgba(0,255,160,.08), transparent 55%),
-        radial-gradient(900px 500px at 85% 20%, rgba(0,255,255,.06), transparent 60%),
-        radial-gradient(900px 500px at 70% 90%, rgba(0,180,120,.08), transparent 60%),
+        radial-gradient(1200px 600px at 15% 10%, rgba(0, 255, 160, 0.08), transparent 55%),
+        radial-gradient(900px 500px at 85% 20%, rgba(0, 255, 255, 0.06), transparent 60%),
+        radial-gradient(900px 500px at 70% 90%, rgba(0, 180, 120, 0.08), transparent 60%),
         url("../img/fondo_dash_dev.png");
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
-    }
+}
 
-    /* El contenedor principal empuja el footer abajo */
-    .dev-shell{
+/* =========================================================
+   CONTENEDOR PRINCIPAL
+   - Ocupa el espacio restante y empuja el footer
+========================================================= */
+.dev-shell {
     flex: 1;
-    padding: 26px;
-    padding-top: 90px; /* ajusta si tu navbar es grande */
+    margin: 0 auto;
+    padding: 63px 26px 26px;
     color: var(--text);
-    }
+}
 
-    /* ===== Header ===== */
-    .dev-header{
-    display:flex;
-    align-items:flex-end;
-    justify-content:space-between;
+/* =========================================================
+   HEADER
+   - Bloque superior con título y acciones
+========================================================= */
+.dev-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
     gap: 18px;
     margin-bottom: 18px;
     padding: 18px;
-    border-radius: 18px;
-    background: linear-gradient(135deg, rgba(0,255,160,.12), rgba(0,255,255,.06));
-    border: 1px solid rgba(0,255,160,.20);
-    box-shadow: 0 0 30px rgba(0,255,160,.08);
+
+    border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, rgba(0, 255, 160, 0.12), rgba(0, 255, 255, 0.06));
+    border: 1px solid rgba(0, 255, 160, 0.20);
+    box-shadow: 0 0 30px rgba(0, 255, 160, 0.08);
     backdrop-filter: blur(12px);
-    }
+}
 
-    .dev-title .kicker{
+/* Texto pequeño superior */
+.dev-title .kicker {
     font-size: 12px;
-    letter-spacing: .25em;
+    letter-spacing: 0.25em;
     color: var(--muted);
-    }
+}
 
-    .dev-title h1{
+/* Título principal */
+.dev-title h1 {
     margin: 6px 0 4px;
     font-size: 26px;
-    letter-spacing: .06em;
-    color: #fff; /* ✅ blanco puro */
-    text-shadow: 0 0 10px rgba(255,255,255,.12);
-    }
+    letter-spacing: 0.06em;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.12);
+}
 
-    .dev-title .sub{
+/* Subtítulo */
+.dev-title .sub {
     font-size: 13px;
     color: var(--muted);
-    }
+}
 
-    .dev-actions{
-    display:flex;
+/* Grupo de botones */
+.dev-actions {
+    display: flex;
     gap: 10px;
     flex-wrap: wrap;
-    }
+}
 
-    /* ===== Botones ===== */
-    .neo-btn{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
+/* =========================================================
+   BOTONES
+   - Botón base reutilizable
+========================================================= */
+.neo-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     padding: 10px 14px;
+
     border-radius: 14px;
-    background: rgba(0,255,160,.10);
-    border: 1px solid rgba(0,255,160,.25);
-    color: #fff; /* ✅ blanco */
+    background: rgba(0, 255, 160, 0.10);
+    border: 1px solid rgba(0, 255, 160, 0.25);
+
+    color: var(--text);
     text-decoration: none;
     font-weight: 800;
-    letter-spacing: .03em;
-    box-shadow: 0 0 18px rgba(0,255,160,.10);
-    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
-    }
-    .neo-btn:hover{
+    letter-spacing: 0.03em;
+
+    box-shadow: 0 0 18px rgba(0, 255, 160, 0.10);
+    transition: var(--transition-fast);
+}
+
+.neo-btn:hover {
     transform: translateY(-1px);
-    box-shadow: 0 0 26px rgba(0,255,160,.18);
-    border-color: rgba(0,255,160,.45);
-    }
-    .neo-btn.danger{
-    background: rgba(255,60,60,.12);
-    border-color: rgba(255,60,60,.28);
-    }
+    box-shadow: 0 0 26px rgba(0, 255, 160, 0.18);
+    border-color: rgba(0, 255, 160, 0.45);
+}
 
-    /* ===== Grids ===== */
-    .grid-4{
-    display:grid;
+/* Variante danger */
+.neo-btn.danger {
+    background: rgba(255, 60, 60, 0.12);
+    border-color: rgba(255, 60, 60, 0.28);
+}
+
+/* =========================================================
+   GRIDS
+   - Layouts reutilizables
+========================================================= */
+.grid-4,
+.tools-grid {
+    display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.grid-4 {
     gap: 14px;
     margin-bottom: 14px;
-    }
-    @media (max-width: 1100px){ .grid-4{ grid-template-columns: repeat(2, 1fr);} }
-    @media (max-width: 600px){ .grid-4{ grid-template-columns: 1fr;} }
+}
 
-    .grid-2{
-    display:grid;
-    grid-template-columns: 1.35fr .85fr;
+.tools-grid {
+    gap: 12px;
+}
+
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1.35fr 0.85fr;
     gap: 14px;
     margin-bottom: 14px;
-    }
-    @media (max-width: 1100px){ .grid-2{ grid-template-columns: 1fr; } }
+}
 
-    /* ===== Cards / Panels ===== */
-    .neo-card,
-    .neo-panel{
+/* Responsive grids */
+@media (max-width: 1100px) {
+    .grid-4,
+    .tools-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .grid-2 {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .grid-4,
+    .tools-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* =========================================================
+   TARJETAS Y PANELES
+   - Base visual compartida
+========================================================= */
+.neo-card,
+.neo-panel {
     padding: 16px;
-    border-radius: 18px;
+    border-radius: var(--radius-lg);
     background: var(--glass);
-    border: 1px solid rgba(0,255,160,.16);
-    box-shadow: 0 0 22px rgba(0,255,160,.08);
-    backdrop-filter: blur(12px);
-    }
+    border: var(--panel-border);
+    box-shadow: var(--panel-shadow);
+    backdrop-filter: var(--panel-blur);
+}
 
-    .neo-panel.mega{ padding: 18px; }
+/* Variante panel grande */
+.neo-panel.mega {
+    padding: 18px;
+}
 
-    .neo-card .label{
+/* =========================================================
+   TARJETAS KPI / RESUMEN
+========================================================= */
+.neo-card .label {
     font-size: 12px;
-    letter-spacing: .22em;
-    color: var(--muted);  /* ✅ blanco suave */
+    letter-spacing: 0.22em;
+    color: var(--muted);
     font-weight: 900;
-    }
-    .neo-card .value{
-    font-size: 30px;
-    margin: 10px 0 6px;
-    font-weight: 900;
-    color: #fff;          /* ✅ blanco */
-    text-shadow: none;    /* ✅ más SaaS */
-    }
-    .neo-card .hint{
-    font-size: 13px;
-    color: var(--muted);  /* ✅ blanco suave */
-    }
+}
 
-    .panel-head{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
+.neo-card .value {
+    margin: 10px 0 6px;
+    font-size: 30px;
+    font-weight: 900;
+    color: var(--text);
+    text-shadow: none;
+}
+
+.neo-card .hint {
+    font-size: 13px;
+    color: var(--muted);
+}
+
+/* =========================================================
+   ENCABEZADO DE PANEL
+========================================================= */
+.panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     gap: 10px;
     margin-bottom: 12px;
-    }
-    .panel-head h2{
-    margin:0;
-    font-size: 15px;
-    letter-spacing: .08em;
-    color: #fff;          /* ✅ blanco */
-    }
+}
 
-    /* ===== Chips ===== */
-    .chip{
+.panel-head h2 {
+    margin: 0;
+    font-size: 15px;
+    letter-spacing: 0.08em;
+    color: var(--text);
+}
+
+/* =========================================================
+   CHIPS / BADGES
+========================================================= */
+.chip,
+.chip.green {
     font-size: 11px;
     padding: 6px 10px;
     border-radius: 999px;
-    background: rgba(0,255,160,.12);
-    border: 1px solid rgba(0,255,160,.25);
-    color: #fff;
-    letter-spacing: .16em;
+    background: rgba(0, 255, 160, 0.12);
+    border: 1px solid rgba(0, 255, 160, 0.25);
+    color: var(--text);
+    letter-spacing: 0.16em;
     font-weight: 900;
-    }
-    .chip.green{
-    background: rgba(0,255,160,.12);
-    border-color: rgba(0,255,160,.25);
-    }
+}
 
-    /* ===== Table ===== */
-    .table-wrap{
-    overflow:auto;
-    border-radius: 14px;
-    border: 1px solid rgba(0,255,160,.12);
-    }
+/* =========================================================
+   TABLAS
+========================================================= */
+.table-wrap {
+    overflow: auto;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(0, 255, 160, 0.12);
+}
 
-    .neo-table{
-    width:100%;
-    border-collapse: collapse;
+.neo-table {
+    width: 100%;
     min-width: 760px;
-    background: rgba(0,0,0,.25);
-    }
-    .neo-table thead th{
-    text-align:left;
-    font-size: 12px;
-    letter-spacing: .16em;
-    padding: 12px;
-    color: rgba(255,255,255,.80); /* ✅ blanco suave */
-    border-bottom: 1px solid rgba(0,255,160,.14);
-    }
-    .neo-table tbody td{
-    padding: 12px;
-    border-bottom: 1px solid rgba(0,255,160,.08);
-    color: rgba(255,255,255,.88); /* ✅ */
-    }
-    .neo-table tbody tr:hover{
-    background: rgba(0,255,160,.06);
-    }
-    .neo-table .score{
-    font-weight: 900;
-    color: #fff;          /* ✅ */
-    text-shadow: none;
-    }
-    .empty{
-    padding: 16px !important;
-    text-align:center;
-    color: rgba(255,255,255,.75) !important;
-    }
+    border-collapse: collapse;
+    background: rgba(0, 0, 0, 0.25);
+}
 
-    /* ===== Terminal ===== */
-    .terminal .console{
-    border-radius: 14px;
-    border: 1px solid rgba(0,255,160,.14);
-    background: rgba(0,0,0,.30);
+/* Cabecera */
+.neo-table thead th {
     padding: 12px;
+    text-align: left;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    color: rgba(255, 255, 255, 0.80);
+    border-bottom: 1px solid rgba(0, 255, 160, 0.14);
+}
+
+/* Celdas */
+.neo-table tbody td {
+    padding: 12px;
+    color: rgba(255, 255, 255, 0.88);
+    border-bottom: 1px solid rgba(0, 255, 160, 0.08);
+}
+
+/* Hover fila */
+.neo-table tbody tr:hover {
+    background: rgba(0, 255, 160, 0.06);
+}
+
+/* Puntaje o valor fuerte */
+.neo-table .score {
+    font-weight: 900;
+    color: var(--text);
+    text-shadow: none;
+}
+
+/* Estado vacío */
+.empty {
+    padding: 16px !important;
+    text-align: center;
+    color: var(--muted) !important;
+}
+
+/* =========================================================
+   TERMINAL / CONSOLA
+========================================================= */
+.terminal .console {
+    padding: 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(0, 255, 160, 0.14);
+    background: rgba(0, 0, 0, 0.30);
+
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
     line-height: 1.55;
-    }
-    .terminal .line{ color: rgba(255,255,255,.88); }
-    .terminal .p{ color: rgba(255,255,255,.92); font-weight: 900; } /* ✅ blanco */
-    .terminal .v{ color: rgba(255,255,255,.80); } /* ✅ blanco suave */
-    .terminal .sep{
-    height: 1px;
-    background: rgba(0,255,160,.14);
-    margin: 12px 0;
-    }
+}
 
-    /* ===== JSON / tools ===== */
-    .quick-actions{
-    display:flex;
+.terminal .line {
+    color: rgba(255, 255, 255, 0.88);
+}
+
+.terminal .p {
+    color: rgba(255, 255, 255, 0.92);
+    font-weight: 900;
+}
+
+.terminal .v {
+    color: rgba(255, 255, 255, 0.80);
+}
+
+.terminal .sep {
+    height: 1px;
+    margin: 12px 0;
+    background: rgba(0, 255, 160, 0.14);
+}
+
+/* =========================================================
+   ACCIONES RÁPIDAS / JSON
+========================================================= */
+.quick-actions {
+    display: flex;
     gap: 10px;
     margin-top: 12px;
     flex-wrap: wrap;
-    }
+}
 
-    .test-json{
+.test-json {
     margin-top: 10px;
-    border-radius: 14px;
-    border: 1px solid rgba(0,255,160,.14);
-    background: rgba(0,0,0,.35);
     padding: 12px;
-    overflow:auto;
-    color: rgba(255,255,255,.85); /* ✅ */
-    }
+    overflow: auto;
 
-    .tools-grid{
-    display:grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 12px;
-    }
-    @media (max-width: 1100px){ .tools-grid{ grid-template-columns: repeat(2, 1fr);} }
-    @media (max-width: 600px){ .tools-grid{ grid-template-columns: 1fr;} }
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(0, 255, 160, 0.14);
+    background: rgba(0, 0, 0, 0.35);
+    color: rgba(255, 255, 255, 0.85);
+}
 
-    .tool-card{
-    display:block;
+/* =========================================================
+   TARJETAS DE HERRAMIENTAS
+========================================================= */
+.tool-card {
+    display: block;
     padding: 16px;
-    border-radius: 18px;
-    text-decoration:none;
-    background: linear-gradient(135deg, rgba(0,255,160,.10), rgba(0,255,255,.08));
-    border: 1px solid rgba(0,255,160,.18);
-    box-shadow: 0 0 22px rgba(0,255,160,.08);
-    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
-    color: #fff; /* ✅ todo blanco */
-    }
-    .tool-card:hover{
+
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    color: var(--text);
+
+    background: linear-gradient(135deg, rgba(0, 255, 160, 0.10), rgba(0, 255, 255, 0.08));
+    border: 1px solid rgba(0, 255, 160, 0.18);
+    box-shadow: 0 0 22px rgba(0, 255, 160, 0.08);
+
+    transition: var(--transition-fast);
+}
+
+.tool-card:hover {
     transform: translateY(-2px);
-    border-color: rgba(0,255,160,.40);
-    box-shadow: 0 0 30px rgba(0,255,160,.14);
-    }
-    .tool-card .t-title{
-    font-weight: 900;
-    letter-spacing: .06em;
+    border-color: rgba(0, 255, 160, 0.40);
+    box-shadow: 0 0 30px rgba(0, 255, 160, 0.14);
+}
+
+.tool-card .t-title {
     margin-bottom: 6px;
-    color: #fff;
-    }
-    .tool-card .t-sub{
-    color: rgba(255,255,255,.75);
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    color: var(--text);
+}
+
+.tool-card .t-sub {
     font-size: 13px;
-    }
+    color: var(--muted);
+}

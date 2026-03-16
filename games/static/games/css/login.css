@@ -1,6 +1,7 @@
+    /* Importa fuentes externas desde Google Fonts para textos y títulos del diseño */
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Press+Start+2P&display=swap');
     @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&display=swap');
-
+    /* Registra una fuente local personalizada para usarla en el título principal */
     @font-face{
     font-family:'Blanka';
     src:url('../fonts/Blanka-Regular.otf') format('opentype');
@@ -9,6 +10,7 @@
     }
 
     /* ================= GLOBAL ================= */
+    /* Reset global: elimina márgenes y rellenos por defecto, unifica el modelo de caja y define la fuente base */
     *{
     margin:0;
     padding:0;
@@ -16,41 +18,41 @@
     font-family:'Orbitron', sans-serif;
     transition: all 0.25s ease;
     }
-
+    /* Hace que la página ocupe todo el ancho y alto de la ventana del navegador */
     html, body{
     height:100%;
     width:100%;
     margin:0;
     }
-
+    /* Estructura principal de la página con fondo animado y estilo general */
     body{
     min-height:100dvh;
     display:flex;
     flex-direction:column;
-
+    /* Fondo degradado animado */
     background: linear-gradient(-45deg, #020010, #0b0033, #14004d, #020010);
     background-size: 400% 400%;
     animation: gradientMove 10s ease infinite;
-
-    cursor: crosshair;
+    /* Cursor personalizado; si no carga, el navegador usa el cursor por defecto */
     cursor: url('https://ani.cursors-4u.net/cursors/cur-13/cur1145.cur'), auto;
-
+    /* Oculta el desbordamiento para evitar scroll y mantener fija la composición visual */
     overflow:hidden;
+    /* Sirve como referencia para efectos decorativos */
     position:relative;
     }
 
+
+    /* Keyframes: Sirven para definir una animación paso a paso. Aquí se indica cómo debe empezar, cambiar y terminar un efecto visual, por ejemplo mover un fondo, hacer que un brillo pulse o que un texto parpadee. 
+    */
+    /* Mueve la posición del fondo para animar el degradado principal */
     @keyframes gradientMove{
     0%{ background-position:0% 50% }
     50%{ background-position:100% 50% }
     100%{ background-position:0% 50% }
     }
 
-    @keyframes fadeIn{
-    from{ opacity:0 }
-    to{ opacity:1 }
-    }
 
-    /* Scanlines */
+    /* Líneas decorativas tipo pantalla retro */
     body::after{
     content:"";
     position:fixed;
@@ -66,7 +68,7 @@
     z-index:1;
     }
 
-    /* Radial vignette */
+    /* Efecto de luz suave en el fondo */
     body::before{
     content:"";
     position:fixed;
@@ -77,6 +79,7 @@
     }
 
     /* ================= HERO ================= */
+    /* Sección principal que contiene el contenido central */
     .hero{
     flex:1;
     min-height:calc(100dvh - 70px);
@@ -86,7 +89,7 @@
     width:100%;
     padding:20px 0;
     margin:0;
-
+    /* Imagen de fondo con una capa oscura encima */
     background:
         linear-gradient(rgba(5,0,20,0.75), rgba(5,0,20,0.85)),
         url("/static/games/img/fondo_login.jpg");
@@ -94,12 +97,11 @@
     background-size:cover;
     background-position:center;
     background-repeat:no-repeat;
-
     position:relative;
     z-index:2;
     }
 
-    /* Partículas */
+    /* Partículas decorativas sobre el fondo */
     .hero::before{
     content:"";
     position:absolute;
@@ -110,11 +112,12 @@
     pointer-events:none;
     }
 
+    /* Mueve las partículas del fondo lentamente */
     @keyframes particlesMove{
     from{ background-position:0 0 }
     to{ background-position:1200px 1200px }
     }
-
+    /* Organiza el banner y la caja principal en columna */
     .hero-content{
     display:flex;
     flex-direction:column;
@@ -128,35 +131,38 @@
     width:min(900px, 92vw);
     display:flex;
     margin-top:-20px;
-
     border-radius:25px;
+    /* Fondo semitransparente con efecto de vidrio */
     background:rgba(15,10,35,0.6);
     backdrop-filter:blur(30px);
-
     border:1px solid rgba(255,0,255,0.15);
+    /* Brillo exterior estilo neón */
     box-shadow:
         0 0 40px rgba(255,0,255,0.3),
         0 0 80px rgba(0,255,255,0.2);
 
     overflow:hidden;
     position:relative;
-
+    /* Animación de entrada y efecto de respiración visual */
     animation: slideUp 0.7s ease, breathe 5s ease-in-out infinite;
+    /* Ayuda a que esta caja se procese de forma más ordenada */
     contain: layout paint;
-
     max-height:80vh;
     align-items:stretch;
     }
 
+    /* Efecto visual al pasar el mouse sobre la caja */
     .auth-box:hover{
     transform:scale(1.005);
     }
 
+    /* Hace que la caja aparezca desde abajo */
     @keyframes slideUp{
     from{ transform:translateY(40px); opacity:0 }
     to{ transform:translateY(0); opacity:1 }
     }
 
+    /* Hace que el brillo suba y baje suavemente */
     @keyframes breathe{
     0%,100%{
         box-shadow:
@@ -170,7 +176,7 @@
     }
     }
 
-    /* Borde neon animado */
+    /* Borde animado alrededor de la caja */
     .auth-box::after{
     content:"";
     position:absolute;
@@ -180,19 +186,19 @@
     background:linear-gradient(90deg,#ff00ff,#00f0ff,#ff00ff);
     background-size:300% 300%;
     animation:borderFlow 6s linear infinite;
-
+    /* Se usa para que el efecto se vea solo en el borde */
     mask:linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
     mask-composite:exclude;
-
     pointer-events:none;
     }
 
+    /* Desplaza el brillo del borde animado */
     @keyframes borderFlow{
     0%{ background-position:0% 50% }
     100%{ background-position:300% 50% }
     }
 
-    /* Línea vertical fija */
+    /* Línea decorativa que separa visualmente ambos paneles */
     .auth-box::before{
     content:"";
     position:absolute;
@@ -200,20 +206,20 @@
     bottom:10%;
     left:35%;
     width:2px;
-
     background: linear-gradient(to bottom, transparent, #00f0ff, #ff00ff, transparent);
     box-shadow: 0 0 6px #00f0ff, 0 0 12px #ff00ff;
-
     pointer-events:none;
     animation: pulseLine 3s infinite alternate;
     }
 
+    /* Hace que la línea decorativa cambie suavemente de intensidad */
     @keyframes pulseLine{
     from{ opacity:0.6 }
     to{ opacity:1 }
     }
 
     /* ================= LEFT PANEL ================= */
+    /* Panel izquierdo con texto de bienvenida */
     .left-panel{
     width:40%;
     max-width:40%;
@@ -226,13 +232,13 @@
     padding:clamp(20px, 3vh, 50px);
     }
 
+    /* Título con efecto neón y estilo arcade */
     .left-panel h2{
     font-family:'Black Ops One', cursive;
     font-size:25px;
     color:#00f0ff;
     margin-bottom:35px;
     letter-spacing:2px;
-
     text-shadow:
         -1px -1px 0 #000,
         1px -1px 0 #000,
@@ -240,17 +246,16 @@
         1px  1px 0 #000,
         0 0 15px #00f0ff,
         0 0 25px #ff00ff;
-
     filter:
         drop-shadow(-1px -1px 0 #000)
         drop-shadow( 1px -1px 0 #000)
         drop-shadow(-1px  1px 0 #000)
         drop-shadow( 1px  1px 0 #000)
         drop-shadow(0 0 18px currentColor);
-
     animation: glitch 3s infinite, flicker 2s infinite;
     }
 
+    /* Crea una pequeña distorsión visual en el texto */
     @keyframes glitch{
     0%{ text-shadow:1px 0 #ff00ff,-1px 0 #00f0ff; }
     25%{ text-shadow:-1px -1px #ff00ff,1px 1px #00f0ff; }
@@ -259,11 +264,13 @@
     100%{ text-shadow:1px 0 #ff00ff,-1px 0 #00f0ff; }
     }
 
+    /* Hace que el texto parpadee como un letrero de neón */
     @keyframes flicker{
     0%,18%,22%,25%,53%,57%,100%{ opacity:1 }
     20%,24%,55%{ opacity:0.4 }
     }
 
+    /* Botón secundario con fondo transparente */
     .ghost-btn{
     padding:12px 28px;
     border:1px solid #00f0ff;
@@ -272,17 +279,18 @@
     border-radius:30px;
     cursor:pointer;
     text-decoration:none;
-    transition:0.3s;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
     margin-top:30px;
     }
 
+    /* Efecto visual del botón al pasar el mouse */
     .ghost-btn:hover{
     box-shadow:0 0 20px #00f0ff;
     transform:scale(1.05);
-    margin-top:15px;
     }
 
     /* ================= RIGHT PANEL ================= */
+    /* Panel derecho que contiene el formulario */
     .right-panel{
     width:65%;
     max-width:65%;
@@ -294,41 +302,39 @@
     text-align:left;
     padding:clamp(25px, 3vh, 45px);
     }
-
+    /* Título principal del formulario */
     .right-panel h2{
     font-family:'Black Ops One', cursive;
     align-self:center;
     text-align:left;
-
     font-size:25px;
     color:#ff00ff;
     margin-bottom:45px;
     letter-spacing:2px;
-
     text-shadow:
         -1px -1px 0 #000,
         1px -1px 0 #000,
         -1px  1px 0 #000,
         1px  1px 0 #000,
         0 0 20px #ff00ff;
-
     filter:
         drop-shadow(-1px -1px 0 #000)
         drop-shadow( 1px -1px 0 #000)
         drop-shadow(-1px  1px 0 #000)
         drop-shadow( 1px  1px 0 #000)
         drop-shadow(0 0 18px currentColor);
-
     transform: translateY(12px);
     animation: glitch 3s infinite, flicker 2s infinite;
     }
 
+    /* Agrupa y limita el ancho de los campos del formulario */
     .input-group{
     width:100%;
     max-width:720px;
     margin:0 auto;
     }
 
+    /* Texto que indica qué dato debe escribir el usuario */
     .input-group label{
     display:block;
     margin-bottom:6px;
@@ -337,6 +343,7 @@
     letter-spacing:1px;
     }
 
+    /* Campos de entrada con estilo oscuro y futurista */
     .input-group input{
     width:100%;
     padding:16px;
@@ -351,6 +358,7 @@
     box-shadow: inset 0 0 6px rgba(0,0,0,0.8);
     }
 
+    /* Resalta el campo cuando el usuario lo selecciona */
     .input-group input:focus{
     outline:none;
     border-color:#ff00ff;
@@ -359,57 +367,54 @@
     color:#ffffff;
     }
 
-    /* Placeholder */
+    /* Texto de ayuda que aparece dentro de los campos */
     ::placeholder{
     color:#7fdede;
     opacity:0.6;
     }
 
-    /* Forgot */
+    /* Enlace para recuperar la contraseña */
     .forgot{
     display:block;
     margin-bottom:20px;
     font-size:13px;
     color:#00f0ff;
     text-decoration:none;
-    transition:0.3s;
+    transition:0.3s ease;
     }
     .forgot:hover{ color:#ff00ff; }
 
-    /* Button */
+    /* Botón principal del formulario */
     .primary-btn{
     width:100%;
     padding:16px;
     border:none;
     border-radius:6px;
-
+    /* Fondo animado para que el botón se vea más llamativo */
     background:linear-gradient(90deg,#ff00ff,#00ffff,#ff00ff);
     background-size:300% 100%;
-
     color:white;
     cursor:pointer;
     font-family:'Black Ops One', cursive;
-
     text-shadow:
         -1px -1px 0 #000,
         1px -1px 0 #000,
         -1px  1px 0 #000,
         1px  1px 0 #000,
         0 0 8px #ff00ff;
-
     filter:
         drop-shadow(-1px -1px 0 #000)
         drop-shadow( 1px -1px 0 #000)
         drop-shadow(-1px  1px 0 #000)
         drop-shadow( 1px  1px 0 #000)
         drop-shadow(0 0 8px #ff00ff);
-
     font-size:11px;
     letter-spacing:2px;
     text-transform:uppercase;
 
     box-shadow: 0 0 10px #ff00ff, 0 0 20px #00ffff;
     animation: arcadeFlow 4s linear infinite;
+    transition: filter 0.25s ease, box-shadow 0.25s ease;
     }
 
     .primary-btn:hover{
@@ -417,44 +422,15 @@
     box-shadow: 0 0 25px #ff00ff, 0 0 40px #00ffff;
     }
 
+    /* Mueve el color del botón para dar sensación de energía */
     @keyframes arcadeFlow{
     0%{ background-position:0% 50% }
     100%{ background-position:300% 50% }
     }
 
-    /* Social */
-    .social{
-    text-align:center;
-    margin-top:10px;
-    }
-
-    .social-icons{
-    margin-top:10px;
-    display:flex;
-    justify-content:center;
-    gap:15px;
-    }
-
-    .social-icons div{
-    width:45px;
-    height:45px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    border-radius:50%;
-    border:1px solid #00f0ff;
-    color:#00f0ff;
-    cursor:pointer;
-    transition:0.3s;
-    }
-
-    .social-icons div:hover{
-    background:#00f0ff;
-    color:#050010;
-    box-shadow:0 0 20px #00f0ff;
-    }
 
     /* ================= TÍTULO BANNER ================= */
+    /* Banner superior con el nombre principal del sitio */
     .titulo-banner{
     width: min(900px, 92vw);
     text-align:center;
@@ -469,21 +445,21 @@
     border-radius: 18px;
     }
 
+    /* Título principal con fuente personalizada y brillo */
     .titulo-principal{
     font-family:'Blanka', sans-serif;
     font-size:3.5rem;
     letter-spacing:6px;
     text-transform:uppercase;
     color:#00f0ff;
-
     text-shadow:
         0 0 5px #00f0ff,
         0 0 15px #00f0ff,
         0 0 30px rgba(0,240,255,0.6);
-
     animation: neonPulse 2s infinite alternate;
     }
 
+    /* Hace que el brillo del título aumente y disminuya */
     @keyframes neonPulse{
     from{
         text-shadow:
@@ -514,6 +490,7 @@
     }
 
     /* ================= FOOTER ================= */
+    /* Pie de página del sitio */
     .site-footer{
     width:100%;
     text-align:center;
@@ -537,22 +514,22 @@
     right:30px;
     z-index:2000;
     opacity:0.4;
-    transition:0.3s;
+    transition: opacity 0.3s ease;
     }
     .volume-control:hover{ opacity:1; }
 
+    /* Contenedor del control de volumen */
     .slider{
     position:relative;
     display:flex;
     align-items:center;
     }
 
-    /* Slider vertical */
+    /* Barra vertical para subir o bajar volumen */
     .slider .level{
     appearance:none;
     writing-mode: bt-lr;
     -webkit-appearance: slider-vertical;
-
     width:12px;
     height:120px;
     background: rgba(30,30,30,0.85);
@@ -587,6 +564,7 @@
     }
 
     /* ================= RESPONSIVE ================= */
+    /* Ajustes para pantallas medianas o tablets */
     @media (max-width: 980px){
     body{ overflow-y:auto; }
 
@@ -630,6 +608,7 @@
     }
     }
 
+    /* Ajustes para celulares pequeños */
     @media (max-width: 560px){
     .titulo-principal{
         font-size:1.6rem;

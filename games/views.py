@@ -3,17 +3,19 @@ import mimetypes
 import os
 import re
 import unicodedata
+import uuid
+from urllib.parse import urlencode
 from datetime import date
+import httpx
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.http import JsonResponse
-from django.contrib.auth.forms import UserChangeForm
 from .forms import EditProfileForm, ProfileForm
-from .models import Juego, Partida, Profile, Usuario, FriendRequest, Friendship, DirectMessage
+from .models import Juego, Partida, Profile, Usuario, FriendRequest, Friendship, DirectMessage, Notification
 from .roles import ROLE_ADMIN, ROLE_DESARROLLADOR, ROLE_JUGADOR, get_user_role, is_admin, is_desarrollador, is_jugador
 from django.db.models import Sum, Count
 from django.utils import timezone
@@ -21,17 +23,72 @@ from django.views.decorators.http import require_http_methods
 from django.db.models import Q
 from django.contrib.auth import get_user_model
 from django.conf import settings
-from django.db import connection
+from django.db import connection, OperationalError, ProgrammingError
 from django.db.models import Avg, Count
+from django.shortcuts import render, get_object_or_404
+from django.templatetags.static import static
+from django.urls import reverse
+from supabase import AuthApiError, AuthInvalidCredentialsError, AuthWeakPasswordError
 from supabase_cliente import (
-    get_public_storage_url,
+    create_supabase_auth_client,
     insert_support_ticket,
     list_support_tickets,
+    delete_profile_avatar_from_url,
     upload_profile_avatar,
     upload_support_screenshot,
     update_support_ticket_status,
 )
 User = get_user_model()
+
+
+def _supabase_auth_client():
+    # Cliente por request para evitar sesiones compartidas entre usuarios.
+    return create_supabase_auth_client()
+
+
+def _normalize_username(value: str) -> str:
+    raw = (value or "").strip()
+    if not raw:
+        return ""
+    safe = re.sub(r"[^A-Za-z0-9_.-]+", "_", raw)
+    return safe.strip("_") or "user"
+
+
+def _ensure_local_user(email: str, username_hint: str | None = None) -> User:
+    email = (email or "").strip().lower()
+    if not email:
+        raise ValueError("Email requerido")
+
+    username_hint = _normalize_username(username_hint or email.split("@")[0])
+    candidate = username_hint
+    counter = 1
+    while User.objects.filter(username=candidate).exclude(email=email).exists():
+        counter += 1
+        candidate = f"{username_hint}{counter}"
+
+    # Mantiene sesión local de Django sincronizada con Supabase Auth.
+    user = User.objects.filter(email=email).first()
+    created = False
+    if not user:
+        user = User.objects.create(email=email, username=candidate)
+        created = True
+    updated = False
+    if created:
+        user.set_unusable_password()
+        updated = True
+    if not user.username:
+        user.username = candidate
+        updated = True
+    if updated:
+        user.save(update_fields=["username", "password"])
+    return user
+
+
+def _resolve_game_image(path_or_url: str) -> str:
+    value = (path_or_url or "").strip()
+    if value.startswith(("http://", "https://")):
+        return value
+    return static(value or "games/img/game1.png")
 
 
 def _support_games_options() -> list[str]:
@@ -108,27 +165,59 @@ def login_view(request):
 
 
     if request.method == "POST":
-        username_or_email = request.POST.get("username")
+        username_or_email = (request.POST.get("username") or "").strip()
         password = request.POST.get("password")
 
-        # Permitir login con email
+        email = ""
         if "@" in username_or_email:
-            try:
-                user_obj = User.objects.get(email=username_or_email)
-                username = user_obj.username
-            except User.DoesNotExist:
-                messages.error(request, "Usuario no encontrado")
-                return redirect("login")
+            email = username_or_email
         else:
-            username = username_or_email
+            user_obj = User.objects.filter(username__iexact=username_or_email).first()
+            if user_obj and user_obj.email:
+                email = user_obj.email
+            else:
+                try:
+                    usuario_row = Usuario.objects.filter(nombre__iexact=username_or_email).first()
+                except (ProgrammingError, OperationalError):
+                    usuario_row = None
+                if usuario_row and usuario_row.email:
+                    email = usuario_row.email
 
-        user = authenticate(request, username=username, password=password)
+        if not email:
+            messages.error(request, "Usuario no encontrado")
+            return redirect("login")
 
-        if user is not None:
-            login(request, user)
-            return redirect("dashboard")
-        else:
+        try:
+            auth_client = _supabase_auth_client()
+            auth_resp = auth_client.auth.sign_in_with_password(
+                {"email": email, "password": password}
+            )
+        except AuthInvalidCredentialsError:
             messages.error(request, "Credenciales incorrectas")
+            return redirect("login")
+        except AuthApiError as exc:
+            if exc.code == "email_not_confirmed":
+                messages.error(request, "Debes confirmar tu correo antes de iniciar sesión.")
+            elif exc.code == "invalid_credentials":
+                messages.error(request, "Credenciales incorrectas")
+            else:
+                messages.error(request, "No se pudo iniciar sesión.")
+            return redirect("login")
+
+        # Login Supabase OK -> sesión Django.
+        supa_user = auth_resp.user or (auth_resp.session.user if auth_resp.session else None)
+        if not supa_user or not supa_user.email:
+            messages.error(request, "No se pudo iniciar sesión.")
+            return redirect("login")
+
+        username_hint = None
+        metadata = getattr(supa_user, "user_metadata", None) or {}
+        if isinstance(metadata, dict):
+            username_hint = metadata.get("username")
+
+        user = _ensure_local_user(supa_user.email, username_hint=username_hint)
+        login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+        return redirect("dashboard")
 
     return render(request, "games/login.html")
 
@@ -137,10 +226,14 @@ def login_view(request):
 def register_view(request):
 
     if request.method == "POST":
-        username = request.POST.get("username")
-        email = request.POST.get("email")
+        username = (request.POST.get("username") or "").strip()
+        email = (request.POST.get("email") or "").strip().lower()
         password1 = request.POST.get("password1")
         password2 = request.POST.get("password2")
+
+        if not email or "@" not in email:
+            messages.error(request, "Ingresa un correo válido")
+            return redirect("register")
 
         if password1 != password2:
             messages.error(request, "Las contraseÃ±as no coinciden")
@@ -153,28 +246,134 @@ def register_view(request):
                 messages.error(request, error)
             return redirect("register")
 
-        if User.objects.filter(username=username).exists():
-            messages.error(request, "El usuario ya existe")
-            return redirect("register")
-
         if User.objects.filter(email=email).exists():
-            messages.error(request, "El correo ya estÃ¡ registrado")
+            messages.error(request, "El correo ya está registrado")
             return redirect("register")
 
-        user = User.objects.create_user(
-            username=username,
-            email=email,
-            password=password1
-        )
+        try:
+            auth_client = _supabase_auth_client()
+            auth_resp = auth_client.auth.sign_up(
+                {
+                    "email": email,
+                    "password": password1,
+                    "options": {"data": {"username": username}},
+                }
+            )
+        except AuthWeakPasswordError as exc:
+            messages.error(request, exc.message or "La contraseña es muy débil.")
+            return redirect("register")
+        except AuthApiError as exc:
+            if exc.code in {"email_exists", "user_already_exists"}:
+                messages.error(request, "El correo ya está registrado")
+            else:
+                messages.error(request, "No se pudo crear la cuenta.")
+            return redirect("register")
 
-        login(request, user)
+        # Si Supabase requiere confirmación, no hay sesión inmediata.
+        if not auth_resp.session:
+            messages.success(
+                request,
+                "Cuenta creada. Revisa tu correo para confirmar y luego inicia sesión.",
+            )
+            return redirect("login")
+
+        supa_user = auth_resp.user or auth_resp.session.user
+        user = _ensure_local_user(supa_user.email, username_hint=username)
+        login(request, user, backend="django.contrib.auth.backends.ModelBackend")
         return redirect("home")
 
     return render(request, "games/register.html")
 
+
+def password_reset_request_view(request):
+    if request.method == "POST":
+        email = (request.POST.get("email") or "").strip().lower()
+        if not email:
+            messages.error(request, "Ingresa un correo válido.")
+            return redirect("password_reset")
+
+        try:
+            auth_client = _supabase_auth_client()
+            redirect_url = request.build_absolute_uri(
+                reverse("password_reset_confirm")
+            )
+            auth_client.auth.reset_password_for_email(
+                email,
+                options={"redirect_to": redirect_url},
+            )
+        except httpx.ReadTimeout:
+            messages.error(request, "Tiempo de espera al contactar Supabase. Intenta de nuevo.")
+            return redirect("password_reset")
+        except AuthApiError as exc:
+            if exc.code == "over_email_send_rate_limit":
+                messages.error(request, "Espera un momento antes de solicitar otro correo.")
+                return redirect("password_reset")
+            messages.error(request, "No se pudo enviar el correo de recuperación.")
+            return redirect("password_reset")
+
+        return redirect("password_reset_done")
+
+    return render(request, "games/password_reset.html")
+
+
+def password_reset_done_view(request):
+    return render(request, "games/password_reset_done.html")
+
+
+def password_reset_confirm_view(request):
+    if request.method == "POST":
+        access_token = (request.POST.get("access_token") or "").strip()
+        refresh_token = (request.POST.get("refresh_token") or "").strip()
+        password1 = request.POST.get("password1") or ""
+        password2 = request.POST.get("password2") or ""
+
+        if not access_token or not refresh_token:
+            messages.error(request, "El enlace de recuperación no es válido.")
+            return redirect("password_reset")
+
+        if password1 != password2:
+            messages.error(request, "Las contraseñas no coinciden.")
+            query = urlencode({"access_token": access_token, "refresh_token": refresh_token})
+            return redirect(f"{request.path}?{query}")
+
+        try:
+            validate_password(password1)
+        except ValidationError as e:
+            for error in e.messages:
+                messages.error(request, error)
+            query = urlencode({"access_token": access_token, "refresh_token": refresh_token})
+            return redirect(f"{request.path}?{query}")
+
+        try:
+            auth_client = _supabase_auth_client()
+            auth_client.auth.set_session(access_token, refresh_token)
+            auth_client.auth.update_user({"password": password1})
+        except AuthApiError:
+            messages.error(request, "No se pudo cambiar la contraseña.")
+            return redirect("password_reset")
+
+        return redirect("password_reset_complete")
+
+    access_token = (request.GET.get("access_token") or "").strip()
+    refresh_token = (request.GET.get("refresh_token") or "").strip()
+    return render(
+        request,
+        "games/password_reset_confirm.html",
+        {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+        },
+    )
+
+
+def password_reset_complete_view(request):
+    return render(request, "games/password_reset_complete.html")
+
 @login_required
 @user_passes_test(is_jugador)
 def dashboard_user(request):
+    excluded_titles = {"plants vs zombies"}
+
     def normalizar_categoria(valor):
         txt = str(valor or "").strip().lower()
         txt = unicodedata.normalize("NFD", txt)
@@ -182,36 +381,60 @@ def dashboard_user(request):
 
     # Mapa rapido para cards del dashboard (imagen por titulo).
     # Aqui tambien se mapean los juegos externos agregados por ZIP.
+    # Img de las portadas
     imagenes_por_titulo = {
-        "space invaders": "games/img/game1.png",
-        "wall blood": "games/img/game2.png",
-        "regular show: fist punch": "games/img/game3.png",
-        "regular show: battle of the behemoths": "games/img/game3.png",
-        "sky streaker": "games/img/game1.png",
-        "escaping the prison": "games/img/game2.png",
-        "extreme pamplona": "games/img/game3.png",
-        "agent p: rebel spy": "games/img/game3.png",
+        "one hit kill": "https://mukvhdxlmtjdpbpodfht.supabase.co/storage/v1/object/public/img_port/One%20Hit%20Kill.png",
+        "dungeon spell": "https://mukvhdxlmtjdpbpodfht.supabase.co/storage/v1/object/public/img_port/dungeon%20spell.png",
+        "regular show: fist punch": "https://mukvhdxlmtjdpbpodfht.supabase.co/storage/v1/object/public/img_port/Regular%20ShowFist%20Punch.png",
+        "regular show: battle of the behemoths": "https://mukvhdxlmtjdpbpodfht.supabase.co/storage/v1/object/public/img_port/Regular%20Show%20Battle%20of%20the%20Behemoths.png",
+        "sky streaker": "https://mukvhdxlmtjdpbpodfht.supabase.co/storage/v1/object/public/img_port/Sky%20Streaker.png",
+        "escaping the prison": "https://mukvhdxlmtjdpbpodfht.supabase.co/storage/v1/object/public/img_port/Escaping%20the%20Prison.png",
+        "extreme pamplona": "https://mukvhdxlmtjdpbpodfht.supabase.co/storage/v1/object/public/img_port/Extreme%20Pamplona.png",
+        "agent p: rebel spy": "https://mukvhdxlmtjdpbpodfht.supabase.co/storage/v1/object/public/img_port/Agent%20P%20Rebel%20Spy.png",
+        "bomberman pacman": "https://mukvhdxlmtjdpbpodfht.supabase.co/storage/v1/object/public/img_port/B_P.png",
+        "haunt the house": "https://mukvhdxlmtjdpbpodfht.supabase.co/storage/v1/object/public/img_port/Haunt%20the%20House.png",
+        "armor mayhem": "https://mukvhdxlmtjdpbpodfht.supabase.co/storage/v1/object/public/img_port/Armor%20Mayhem.png",
+        "bite jacker": "https://mukvhdxlmtjdpbpodfht.supabase.co/storage/v1/object/public/img_port/Bite%20Jacker.png",
+        "cactus mccoy": "https://mukvhdxlmtjdpbpodfht.supabase.co/storage/v1/object/public/img_port/Cactus%20McCoy.png",
     }
     # Categoria forzada para titulos externos o legacy.
     categoria_por_titulo = {
-        "space invaders": "Aventura",
-        "wall blood": "Accion",
+        "one hit kill": "Aventura",
+        "dungeon spell": "Accion",
         "regular show: fist punch": "Arcade",
         "regular show: battle of the behemoths": "Arcade",
         "sky streaker": "Arcade",
         "escaping the prison": "Arcade",
         "extreme pamplona": "Arcade",
         "agent p: rebel spy": "Arcade",
+        "bomberman pacman": "Arcade",
+    }
+    categorias_por_titulo = {
+        "cactus mccoy": ["Arcade", "Accion", "Platformer"],
+        "regular show: battle of the behemoths": ["Arcade", "Accion", "Science Fiction"],
+        "one hit kill": ["Aventura", "Science Fiction"],
+        "extreme pamplona": ["Arcade", "Platformer"],
+        "dungeon spell": ["Accion", "Science Fiction"],
+        "regular show: fist punch": ["Arcade","Science Fiction", "Aventura"],
     }
 
     juegos = []
     for juego_db in Juego.objects.only("titulo", "genero").order_by("id_juego"):
         titulo = juego_db.titulo
+        if titulo.lower() in excluded_titles:
+            continue
+        categorias = categorias_por_titulo.get(
+            titulo.lower(),
+            [categoria_por_titulo.get(titulo.lower(), juego_db.genero)],
+        )
         juegos.append(
             {
                 "nombre": titulo,
-                "categoria": categoria_por_titulo.get(titulo.lower(), juego_db.genero),
-                "imagen": imagenes_por_titulo.get(titulo.lower(), "games/img/game1.png"),
+                "categoria": " / ".join(categorias),
+                "categorias": categorias,
+                "imagen": _resolve_game_image(
+                    imagenes_por_titulo.get(titulo.lower(), "games/img/game1.png")
+                ),
             }
         )
 
@@ -223,6 +446,7 @@ def dashboard_user(request):
         "Escaping the Prison",
         "Extreme Pamplona",
         "Agent P: Rebel Spy",
+        "Bomberman Pacman",
     ]
     for title in fallback_titles:
         if any(j["nombre"].lower() == title.lower() for j in juegos):
@@ -231,7 +455,8 @@ def dashboard_user(request):
             {
                 "nombre": title,
                 "categoria": categoria_por_titulo[title.lower()],
-                "imagen": imagenes_por_titulo[title.lower()],
+                "categorias": [categoria_por_titulo[title.lower()]],
+                "imagen": _resolve_game_image(imagenes_por_titulo[title.lower()]),
             }
         )
 
@@ -246,7 +471,7 @@ def dashboard_user(request):
         categoria_norm = normalizar_categoria(categoria)
         juegos = [
             j for j in juegos
-            if normalizar_categoria(j["categoria"]) == categoria_norm
+            if any(normalizar_categoria(cat) == categoria_norm for cat in j.get("categorias", [j["categoria"]]))
         ]
 
     return render(request, "games/dashboard.html", {"juegos": juegos})
@@ -266,15 +491,24 @@ def home_view(request):
 @login_required
 @user_passes_test(is_jugador)
 def juego(request, nombre):
-    juego_db = Juego.objects.filter(titulo__iexact=nombre).first()
+    if (nombre or "").strip().lower() == "plants vs zombies":
+        return redirect("dashboard")
+
+    juego_db = Juego.objects.filter(
+        Q(titulo__iexact=nombre) | Q(slug__iexact=nombre)
+    ).first()
+
+    if not juego_db:
+        return redirect("dashboard")
+
     return render(
         request,
         "games/juego.html",
         {
-            "nombre": nombre,
-            "juego_id": juego_db.id_juego if juego_db else None,
-            # En vista de juego se desactiva UI en tiempo real para liberar CPU.
-            "disable_realtime_ui": True,
+            "juego": juego_db,
+            "nombre": juego_db.titulo,
+            "juego_id": juego_db.id_juego,
+            "disable_realtime_ui": False,
         },
     )
 
@@ -289,28 +523,25 @@ def mis_juegos(request):
     return render(request, "games/mis_juegos.html")
 
 @login_required
+#guarda todo en supabase
 def edit_profile(request):
-    profile, created = Profile.objects.get_or_create(user=request.user)
+    profile, _ = Profile.objects.get_or_create(user=request.user)
 
     if request.method == "POST":
         user_form = EditProfileForm(request.POST, instance=request.user)
-        profile_form = ProfileForm(
-            request.POST,
-            request.FILES,
-            instance=profile
-        )
+        profile_form = ProfileForm(request.POST, request.FILES, instance=profile)
 
-        if user_form.is_valid() and profile_form.is_valid():
+        if user_form.is_valid():
             user_form.save()
             avatar = request.FILES.get("avatar")
+            previous_avatar_url = profile.avatar
             if avatar:
-                # Validaciones basicas del avatar antes de subirlo a Storage.
                 max_size = 3 * 1024 * 1024
                 if avatar.size > max_size:
                     messages.error(request, "El avatar excede el limite de 3MB.", extra_tags="profile")
                     return render(request, "games/edit_profile.html", {
                         "user_form": user_form,
-                        "profile_form": profile_form
+                        "profile_form": profile_form,
                     }, status=400)
 
                 allowed_types = {"image/jpeg", "image/png", "image/webp", "image/gif"}
@@ -326,40 +557,49 @@ def edit_profile(request):
                         )
                         return render(request, "games/edit_profile.html", {
                             "user_form": user_form,
-                            "profile_form": profile_form
+                            "profile_form": profile_form,
                         }, status=400)
 
                 try:
                     avatar_bytes = avatar.read()
-                    avatar_path, _ = upload_profile_avatar(
+                    _, public_url = upload_profile_avatar(
                         user_id=request.user.id,
                         original_name=avatar.name or "avatar.bin",
                         content=avatar_bytes,
-                        content_type=detected_type,
+                        content_type=detected_type or avatar.content_type,
                     )
-                    # En DB guardamos path (profiles/...) en lugar de URL completa.
-                    profile.avatar = avatar_path
+                    profile.avatar = f"{public_url}?v={uuid.uuid4().hex}"
                     profile.save(update_fields=["avatar"])
-                except Exception as exc:
+                    if previous_avatar_url and previous_avatar_url != public_url:
+                        try:
+                            delete_profile_avatar_from_url(public_url=previous_avatar_url)
+                        except Exception:
+                            pass
+                except Exception:
                     messages.error(
                         request,
-                        f"No se pudo subir el avatar a Supabase Storage: {exc}",
+                        "No se pudo subir el avatar a Supabase Storage.",
                         extra_tags="profile",
                     )
                     return render(request, "games/edit_profile.html", {
                         "user_form": user_form,
-                        "profile_form": profile_form
+                        "profile_form": profile_form,
                     }, status=502)
-            else:
-                profile_form.save()
+
             return redirect("dashboard")
+
+        messages.error(
+            request,
+            f"Errores en usuario: {user_form.errors.as_text()}",
+            extra_tags="profile",
+        )
     else:
         user_form = EditProfileForm(instance=request.user)
         profile_form = ProfileForm(instance=profile)
 
     return render(request, "games/edit_profile.html", {
         "user_form": user_form,
-        "profile_form": profile_form
+        "profile_form": profile_form,
     })
 
 @login_required
@@ -776,7 +1016,12 @@ def api_friend_request_send(request):
     if not query:
         return JsonResponse({"ok": False, "error": "q requerido"}, status=400)
 
-    to_user = User.objects.filter(email__iexact=query).first() if "@" in query else User.objects.filter(username__iexact=query).first()
+    to_user = (
+        User.objects.filter(email__iexact=query).first()
+        if "@" in query
+        else User.objects.filter(username__iexact=query).first()
+    )
+
     if not to_user:
         return JsonResponse({"ok": False, "error": "Usuario no encontrado"}, status=404)
     if to_user.id == request.user.id:
@@ -784,28 +1029,68 @@ def api_friend_request_send(request):
     if Friendship.are_friends(request.user, to_user):
         return JsonResponse({"ok": False, "error": "Ya son amigos"}, status=400)
 
-    inverse = FriendRequest.objects.filter(from_user=to_user, to_user=request.user, status="pending").first()
+    inverse = FriendRequest.objects.filter(
+        from_user=to_user,
+        to_user=request.user,
+        status="pending"
+    ).first()
+
     if inverse:
         inverse.status = "accepted"
         inverse.save(update_fields=["status"])
+
         u1, u2 = Friendship.normalize_pair(request.user, to_user)
         Friendship.objects.get_or_create(user1=u1, user2=u2)
+
+        Notification.objects.create(
+            user=to_user,
+            type=Notification.TYPE_FRIEND_ACCEPTED,
+            title="Solicitud aceptada",
+            text=f"{request.user.username} aceptó tu solicitud de amistad."
+        )
+
         return JsonResponse({"ok": True, "auto_accepted": True})
 
-    fr, _ = FriendRequest.objects.get_or_create(from_user=request.user, to_user=to_user, defaults={"status": "pending"})
+    fr, created = FriendRequest.objects.get_or_create(
+        from_user=request.user,
+        to_user=to_user,
+        defaults={"status": "pending"}
+    )
+
+    if created:
+        Notification.objects.create(
+            user=to_user,
+            type=Notification.TYPE_FRIEND_REQUEST,
+            title="Nueva solicitud de amistad",
+            text=f"{request.user.username} quiere agregarte como amigo."
+        )
+
     return JsonResponse({"ok": True, "request_id": fr.id})
 
 @login_required
 @require_http_methods(["POST"])
 def api_friend_request_accept(request, request_id: int):
-    fr = FriendRequest.objects.filter(id=request_id, to_user=request.user).select_related("from_user").first()
+    fr = FriendRequest.objects.filter(
+        id=request_id,
+        to_user=request.user
+    ).select_related("from_user").first()
+
     if not fr or fr.status != "pending":
-        return JsonResponse({"ok": False, "error": "Solicitud no vÃ¡lida"}, status=404)
+        return JsonResponse({"ok": False, "error": "Solicitud no válida"}, status=404)
 
     fr.status = "accepted"
     fr.save(update_fields=["status"])
+
     u1, u2 = Friendship.normalize_pair(request.user, fr.from_user)
     Friendship.objects.get_or_create(user1=u1, user2=u2)
+
+    Notification.objects.create(
+        user=fr.from_user,
+        type=Notification.TYPE_FRIEND_ACCEPTED,
+        title="Solicitud aceptada",
+        text=f"{request.user.username} aceptó tu solicitud de amistad."
+    )
+
     return JsonResponse({"ok": True})
 
 @login_required
@@ -878,7 +1163,17 @@ def api_message_thread_detail(request, user_id: int):
             .order_by("created_at"))
 
     # Marcar como leÃ­do lo que te enviaron
-    DirectMessage.objects.filter(sender=other, receiver=request.user, is_read=False).update(is_read=True)
+    DirectMessage.objects.filter(
+        sender=other, 
+        receiver=request.user, 
+        is_read=False
+    ).update(is_read=True)
+    
+    Notification.objects.filter(
+        user=request.user,
+        type=Notification.TYPE_MESSAGE,
+        is_read=False
+    ).update(is_read=True)
 
     return JsonResponse({
         "ok": True,
@@ -889,6 +1184,29 @@ def api_message_thread_detail(request, user_id: int):
         ],
     })
 
+@login_required
+@require_http_methods(["POST"])
+def api_message_thread_mark_read(request, user_id: int):
+    other = User.objects.filter(id=user_id).first()
+    if not other:
+        return JsonResponse({"ok": False, "error": "Usuario no existe"}, status=404)
+
+    if not Friendship.are_friends(request.user, other):
+        return JsonResponse({"ok": False, "error": "No son amigos"}, status=403)
+
+    DirectMessage.objects.filter(
+        sender=other,
+        receiver=request.user,
+        is_read=False
+    ).update(is_read=True)
+
+    Notification.objects.filter(
+        user=request.user,
+        type=Notification.TYPE_MESSAGE,
+        is_read=False
+    ).update(is_read=True)
+
+    return JsonResponse({"ok": True})
 
 @login_required
 @require_http_methods(["POST"])
@@ -903,29 +1221,40 @@ def api_message_send(request, user_id: int):
     data = json.loads(request.body.decode("utf-8")) if request.body else {}
     body = (data.get("body") or "").strip()
     if not body:
-        return JsonResponse({"ok": False, "error": "Mensaje vacÃ­o"}, status=400)
+        return JsonResponse({"ok": False, "error": "Mensaje vacío"}, status=400)
 
-    msg = DirectMessage.objects.create(sender=request.user, receiver=other, body=body)
+    msg = DirectMessage.objects.create(
+        sender=request.user,
+        receiver=other,
+        body=body
+    )
+
+    Notification.objects.create(
+        user=other,
+        type=Notification.TYPE_MESSAGE,
+        title="Nuevo mensaje",
+        text=f"{request.user.username} te envió un mensaje: {body[:80]}"
+    )
 
     return JsonResponse({
         "ok": True,
-        "message": {"id": msg.id, "body": msg.body, "created_at": msg.created_at.isoformat(), "from_me": True}
+        "message": {
+            "id": msg.id,
+            "body": msg.body,
+            "created_at": msg.created_at.isoformat(),
+            "from_me": True
+        }
     })
-
+    
 #Helpers
 def _avatar_url(user):
-    # Convierte el valor guardado en avatar a una URL util para frontend.
     try:
         if hasattr(user, "profile") and user.profile.avatar:
-            name = user.profile.avatar.name or ""
-            if name.startswith("http://") or name.startswith("https://"):
-                return name
-            bucket = os.getenv("SUPABASE_STORAGE_BUCKET_AVATARS", "avatars")
-            if name.startswith("profiles/"):
-                # Nuevo formato: path interno en bucket de Supabase.
-                return get_public_storage_url(bucket_name=bucket, object_path=name)
-            # Formato legacy: archivo local en media/.
-            return user.profile.avatar.url
+            value = str(user.profile.avatar).strip()
+            if value.startswith(("http://", "https://")):
+                return value
+            media_url = getattr(settings, "MEDIA_URL", "/media/") or "/media/"
+            return f"{media_url.rstrip('/')}/{value.lstrip('/')}"
     except Exception:
         pass
     return None
@@ -945,3 +1274,52 @@ def _friend_ids(me):
 def api_messages_unread_count(request):
     c = DirectMessage.objects.filter(receiver=request.user, is_read=False).count()
     return JsonResponse({"ok": True, "count": c})
+
+
+    
+@login_required
+def api_notifications_list(request):
+    notifications = Notification.objects.filter(user=request.user).order_by("-created_at")[:30]
+
+    data = []
+    for n in notifications:
+        action = None
+
+        if n.type == Notification.TYPE_MESSAGE:
+            action = "messages"
+        elif n.type == Notification.TYPE_FRIEND_REQUEST:
+            action = "requests"
+        elif n.type == Notification.TYPE_FRIEND_ACCEPTED:
+            action = "friends"
+
+        data.append({
+            "id": n.id,
+            "type": n.type,
+            "title": n.title,
+            "text": n.text,
+            "is_read": n.is_read,
+            "created_at": n.created_at.isoformat(),
+            "action": action,
+        })
+
+    return JsonResponse({
+        "ok": True,
+        "notifications": data,
+    })
+
+
+@login_required
+def api_notifications_unread_count(request):
+    count = Notification.objects.filter(user=request.user, is_read=False).count()
+    return JsonResponse({"ok": True, "count": count})
+
+
+@login_required
+@require_http_methods(["POST"])
+def api_notifications_mark_all_read(request):
+    Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+    return JsonResponse({"ok": True})
+
+def jugar(request, slug):
+    juego = get_object_or_404(Juego, slug=slug, activo=True)
+    return render(request, "games/jugar.html", {"juego": juego})

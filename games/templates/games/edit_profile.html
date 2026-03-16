@@ -1,13 +1,19 @@
 {% extends "games/base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'games/css/edit_profile.css' %}">
+{% endblock %}
+
 {% block content %}
-<canvas id="bgCanvas"></canvas>
+
 <div class="profile-glass">
-    <h2 class="form-group">Editar Perfil</h2>
+    <h2 class="form-title">Editar Perfil</h2>
 
     {% if messages %}
         {% for message in messages %}
             {% if 'profile' in message.tags %}
-                <div class="form-group">
+                <div class="form-msg">
                     {{ message }}
                 </div>
             {% endif %}
@@ -29,13 +35,35 @@
 
         <div class="form-group">
             <label>Foto de perfil</label>
-            {{ profile_form.avatar }}
+
+            <div class="file-upload">
+                {{ profile_form.avatar }}
+                <button type="button" class="btn-file btn-punk" id="fileTrigger">
+                Seleccionar archivo
+                </button>
+                <span class="file-name" id="fileName">Sin archivos seleccionados</span>
+            </div>
         </div>
 
-        <button type="submit" class="btn-save">
+        <button type="submit" class="btn-save btn-punk">
             Guardar Cambios
         </button>
     </form>
 </div>
+<script>
+    const fileInput = document.querySelector('.file-upload input[type="file"]');
+    const fileTrigger = document.getElementById("fileTrigger");
+    const fileName = document.getElementById("fileName");
 
+    if (fileInput && fileTrigger && fileName){
+        // ocultar texto default si el input trae value (por recarga)
+        fileTrigger.addEventListener("click", () => fileInput.click());
+
+        fileInput.addEventListener("change", () => {
+        fileName.textContent = fileInput.files.length
+            ? fileInput.files[0].name
+            : "Sin archivos seleccionados";
+        });
+    }
+</script>
 {% endblock %}

@@ -4,7 +4,7 @@ Proyecto Django conectado a Supabase (Postgres + Storage).
 
 ## Storage actual (sin Base64)
 
-- Avatar de perfil: se sube a bucket `avatars` y en DB se guarda el path (`profiles/...`).
+- Avatar de perfil: se guarda localmente en `media/avatars/`.
 - Captura de soporte: se sube a bucket `support-uploads` y en DB se guarda URL publica en `soporte.screenshot_name`.
 
 ## Variables de entorno requeridas
@@ -15,7 +15,6 @@ En `.env`:
 SUPABASE_URL=https://TU_PROYECTO.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=TU_SERVICE_ROLE_KEY
 SUPABASE_STORAGE_BUCKET_SUPPORT=support-uploads
-SUPABASE_STORAGE_BUCKET_AVATARS=avatars
 SUPABASE_STORAGE_BUCKET_AUDIO=ui-audio
 ```
 
@@ -24,10 +23,9 @@ Notas:
 - `SUPABASE_SERVICE_ROLE_KEY` es solo backend. No exponer en frontend.
 - Los buckets deben existir en Supabase Storage.
 
-## Media local (legacy)
+## Media local
 
-`MEDIA_URL` y `MEDIA_ROOT` quedan como compatibilidad para contenido local antiguo.
-El flujo nuevo de avatar/capturas usa Supabase Storage.
+`MEDIA_URL` y `MEDIA_ROOT` se usan para avatar de perfil local.
 En `urls.py` los archivos `media/` solo se sirven en `DEBUG`.
 
 ## Audios UI en Storage

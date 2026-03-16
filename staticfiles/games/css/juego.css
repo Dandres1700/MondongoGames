@@ -1,0 +1,381 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: "Orbitron", sans-serif;
+}
+
+.game-page {
+    min-height: 100vh;
+    padding-top: 70px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: linear-gradient(180deg, #1a0033 0%, #6a00ff 50%, #a855f7 100%);
+}
+
+.game-header {
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.game-title {
+    font-size: 3.5rem;
+    letter-spacing: 6px;
+    color: #fff;
+    text-shadow:
+        0 0 10px #a855f7,
+        0 0 30px #d28cff,
+        0 0 60px #7a00ff;
+}
+
+.game-container {
+    flex: 1;
+    width: 100%;
+    padding: 20px 0 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-screen {
+    width: min(1120px, 95%);
+    min-height: 0;
+    padding: 30px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    font-size: 22px;
+    color: #d28cff;
+    background: linear-gradient(180deg, rgba(15, 0, 30, 0.95), rgba(5, 0, 15, 0.98));
+    border-radius: 20px;
+    border: 1px solid rgba(210, 140, 255, 0.35);
+    box-shadow:
+        0 0 25px rgba(122, 0, 255, 0.5),
+        inset 0 0 25px rgba(168, 85, 247, 0.25);
+}
+
+/* Tamano normal de los canvas internos. */
+#spaceInvadersCanvas,
+#wallBloodCanvas {
+    display: block;
+    width: min(100%, 1010px);
+    max-width: 1010px;
+    height: auto;
+    margin: 0 auto;
+}
+
+/* Cuando el juego entra en fullscreen, el canvas o iframe ocupa toda la pantalla. */
+#spaceInvadersCanvas:fullscreen,
+#wallBloodCanvas:fullscreen,
+iframe:fullscreen,
+#spaceInvadersCanvas:-webkit-full-screen,
+#wallBloodCanvas:-webkit-full-screen,
+iframe:-webkit-full-screen,
+#spaceInvadersCanvas:-ms-fullscreen,
+#wallBloodCanvas:-ms-fullscreen,
+iframe:-ms-fullscreen {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: none !important;
+    max-height: none !important;
+    margin: 0 !important;
+    background: #000;
+    object-fit: contain;
+}
+
+/* Estilo del toggle glitch de pantalla completa. */
+.glitch-checkbox-wrapper {
+    --bg-color: #0d0d0d;
+    --primary-color: #00f2ea;
+    --secondary-color: #a855f7;
+    --text-color: #e5e5e5;
+    --disabled-color: #555;
+    --font-family: "Fira Code", Consolas, "Courier New", Courier, monospace;
+    --glitch-anim-duration: 0.3s;
+}
+
+.game-fullscreen-toggle {
+    padding: 0.9rem 1.2rem;
+    border-radius: 1rem;
+    background: rgba(5, 5, 5, 0.75);
+    border: 1px solid rgba(0, 242, 234, 0.18);
+    box-shadow: 0 0 20px rgba(0, 242, 234, 0.12);
+}
+
+.glitch-checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+}
+
+.glitch-checkbox-container input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.checkbox-box {
+    width: 1.5em;
+    height: 1.5em;
+    border: 2px solid var(--primary-color);
+    position: relative;
+    transition: all 0.3s ease;
+    clip-path: polygon(
+        15% 0,
+        85% 0,
+        100% 15%,
+        100% 85%,
+        85% 100%,
+        15% 100%,
+        0 85%,
+        0 15%
+    );
+}
+
+.checkbox-mark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 60%;
+    height: 60%;
+    background-color: var(--primary-color);
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    clip-path: inherit;
+}
+
+.checkbox-label {
+    color: var(--text-color);
+    font-family: var(--font-family);
+    font-weight: 500;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    position: relative;
+    transition:
+        color 0.3s ease,
+        text-shadow 0.3s ease;
+}
+
+.glitch-checkbox-container input:checked + .checkbox-box .checkbox-mark {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    animation: glitch-anim-checkbox var(--glitch-anim-duration) both;
+}
+
+.glitch-checkbox-container input:checked ~ .checkbox-label {
+    color: var(--primary-color);
+    text-shadow: 0 0 8px rgba(0, 242, 234, 0.7);
+}
+
+.glitch-checkbox-container:hover .checkbox-box {
+    box-shadow: 0 0 10px var(--primary-color);
+}
+
+.glitch-checkbox-container:hover .checkbox-label::before,
+.glitch-checkbox-container:hover .checkbox-label::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+}
+
+.glitch-checkbox-container:hover .checkbox-label::before {
+    color: var(--secondary-color);
+    animation: glitch-anim-text var(--glitch-anim-duration)
+        cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+.glitch-checkbox-container:hover .checkbox-label::after {
+    color: var(--primary-color);
+    animation: glitch-anim-text var(--glitch-anim-duration)
+        cubic-bezier(0.25, 0.46, 0.45, 0.94) reverse both;
+}
+
+.glitch-checkbox-container:has(input:disabled) {
+    cursor: not-allowed;
+}
+
+.glitch-checkbox-container input:disabled + .checkbox-box {
+    border-color: var(--disabled-color);
+    opacity: 0.5;
+    box-shadow: none;
+}
+
+.glitch-checkbox-container input:disabled ~ .checkbox-label {
+    color: var(--disabled-color);
+    text-shadow: none;
+}
+
+.glitch-checkbox-container:has(input:disabled):hover .checkbox-box {
+    box-shadow: none;
+}
+
+.glitch-checkbox-container:has(input:disabled):hover .checkbox-label::before,
+.glitch-checkbox-container:has(input:disabled):hover .checkbox-label::after {
+    content: none;
+}
+
+@keyframes glitch-anim-checkbox {
+    0% {
+        transform: translate(-50%, -50%);
+        clip-path: inset(0 0 0 0);
+    }
+    20% {
+        transform: translate(calc(-50% - 3px), calc(-50% + 2px));
+        clip-path: inset(50% 0 20% 0);
+    }
+    40% {
+        transform: translate(calc(-50% + 2px), calc(-50% - 1px));
+        clip-path: inset(20% 0 60% 0);
+    }
+    60% {
+        transform: translate(calc(-50% - 2px), calc(-50% + 1px));
+        clip-path: inset(80% 0 5% 0);
+    }
+    80% {
+        transform: translate(calc(-50% + 2px), calc(-50% - 2px));
+        clip-path: inset(30% 0 45% 0);
+    }
+    100% {
+        transform: translate(-50%, -50%);
+        clip-path: inset(0 0 0 0);
+    }
+}
+
+@keyframes glitch-anim-text {
+    0% {
+        transform: translate(0);
+        clip-path: inset(0 0 0 0);
+    }
+    20% {
+        transform: translate(-3px, 2px);
+        clip-path: inset(50% 0 20% 0);
+    }
+    40% {
+        transform: translate(2px, -1px);
+        clip-path: inset(20% 0 60% 0);
+    }
+    60% {
+        transform: translate(-2px, 1px);
+        clip-path: inset(80% 0 5% 0);
+    }
+    80% {
+        transform: translate(2px, -2px);
+        clip-path: inset(30% 0 45% 0);
+    }
+    100% {
+        transform: translate(0);
+        clip-path: inset(0 0 0 0);
+    }
+}
+
+.btn {
+    position: relative;
+    display: inline-block;
+    padding: 0.9em 2.1em;
+    border: 1px solid rgba(0, 255, 255, 0.55);
+    border-radius: 6em;
+    cursor: pointer;
+    font-family: "Orbitron", sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: rgba(240, 248, 255, 0.92);
+    background: rgba(10, 0, 25, 0.75);
+    box-shadow:
+        0 0 0 2px rgba(0, 255, 255, 0.18),
+        0 0 18px rgba(0, 255, 255, 0.18),
+        0 0 28px rgba(255, 0, 255, 0.12);
+    transition: all 0.2s;
+}
+
+.btn:hover {
+    transform: translateY(-3px);
+    box-shadow:
+        0 10px 20px rgba(0, 0, 0, 0.25),
+        0 0 22px rgba(255, 0, 255, 0.25);
+}
+
+.btn:active {
+    transform: translateY(-1px);
+    box-shadow:
+        0 6px 14px rgba(0, 0, 0, 0.25),
+        0 0 18px rgba(255, 0, 255, 0.18);
+}
+
+.btn::after {
+    content: "";
+    display: inline-block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+    border-radius: 100px;
+    background: rgba(10, 0, 25, 0.75);
+    box-shadow:
+        0 0 16px rgba(0, 255, 255, 0.12),
+        0 0 22px rgba(255, 0, 255, 0.10);
+    transition: all 0.4s;
+}
+
+.btn:hover::after {
+    transform: scaleX(1.4) scaleY(1.6);
+    opacity: 0;
+}
+
+.btn.back-btn {
+    position: fixed;
+    left: 24px;
+    top: calc(70px + 18px);
+    z-index: 9999;
+    margin: 0;
+    transform: none;
+}
+
+@media (max-width: 720px) {
+    .game-header {
+        margin-top: 24px;
+        gap: 12px;
+    }
+
+    .game-title {
+        font-size: 2.2rem;
+        letter-spacing: 4px;
+        text-align: center;
+    }
+
+    .game-fullscreen-toggle {
+        width: min(92vw, 360px);
+        padding: 0.8rem 1rem;
+    }
+
+    .checkbox-label {
+        font-size: 0.8rem;
+        letter-spacing: 0.08em;
+    }
+
+    .back-btn {
+        left: 12px;
+        top: calc(70px + 12px);
+        font-size: 14px;
+        padding: 0.8em 1.6em;
+    }
+}

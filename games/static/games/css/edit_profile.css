@@ -1,0 +1,326 @@
+/* =========================================================
+   PANEL PRINCIPAL DEL PERFIL
+   - Contenedor glass principal del formulario
+   - Fondo con degradado suave y brillo neon
+========================================================= */
+.profile-glass {
+    position: relative;
+    overflow: hidden;
+
+    max-width: 860px;
+    margin: 24px auto 40px;
+    padding: 46px 46px 38px;
+
+    background: linear-gradient(
+        135deg,
+        rgba(160, 90, 255, 0.18),
+        rgba(0, 255, 255, 0.10)
+    );
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 26px;
+
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
+
+    box-shadow:
+        0 0 28px rgba(255, 0, 255, 0.18),
+        0 0 38px rgba(0, 255, 255, 0.10);
+}
+
+/* Capa decorativa de brillos */
+.profile-glass::before {
+    content: "";
+    position: absolute;
+    inset: -80px;
+    z-index: 0;
+    opacity: 0.95;
+    filter: blur(18px);
+
+    background:
+        radial-gradient(520px 280px at 18% 18%, rgba(255, 0, 255, 0.22), transparent 55%),
+        radial-gradient(520px 320px at 85% 28%, rgba(0, 255, 255, 0.18), transparent 60%),
+        radial-gradient(520px 320px at 50% 95%, rgba(140, 0, 255, 0.18), transparent 60%);
+}
+
+/* Asegura que el contenido quede encima de los brillos */
+.profile-glass > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* =========================================================
+   TÍTULO Y MENSAJES DEL FORMULARIO
+========================================================= */
+.form-title {
+    margin-bottom: 28px;
+    text-align: center;
+    font-size: 32px;
+    letter-spacing: 2.5px;
+    color: rgba(255, 255, 255, 0.95);
+    text-shadow: 0 0 14px rgba(255, 0, 255, 0.25);
+}
+
+.form-msg {
+    margin-bottom: 14px;
+    padding: 12px 14px;
+    border-radius: 14px;
+
+    background: rgba(0, 255, 255, 0.08);
+    border: 1px solid rgba(0, 255, 255, 0.30);
+    color: rgba(240, 248, 255, 0.95);
+    box-shadow: 0 0 18px rgba(0, 255, 255, 0.14);
+}
+
+/* =========================================================
+   ESTRUCTURA DEL FORMULARIO
+========================================================= */
+.edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 18px;
+    letter-spacing: 1.2px;
+    color: rgba(0, 255, 255, 0.85);
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.18);
+}
+
+/* =========================================================
+   INPUTS DEL FORMULARIO
+   - Inputs de texto, correo y contraseña
+========================================================= */
+.profile-glass input[type="text"],
+.profile-glass input[type="email"],
+.profile-glass input[type="password"] {
+    width: 100%;
+    padding: 18px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+
+    background: rgba(0, 0, 0, 0.22);
+    color: rgba(255, 255, 255, 0.92);
+    font-size: 18px;
+    outline: none;
+
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+/* Placeholders */
+.profile-glass input[type="text"]::placeholder,
+.profile-glass input[type="email"]::placeholder,
+.profile-glass input[type="password"]::placeholder {
+    color: rgba(255, 255, 255, 0.55);
+}
+
+/* Focus */
+.profile-glass input[type="text"]:focus,
+.profile-glass input[type="email"]:focus,
+.profile-glass input[type="password"]:focus {
+    border-color: rgba(255, 0, 255, 0.55);
+    box-shadow:
+        0 0 0 3px rgba(255, 0, 255, 0.15),
+        0 0 18px rgba(0, 255, 255, 0.12);
+    transform: translateY(-1px);
+}
+
+/* File input normal por si lo usas sin custom */
+.profile-glass input[type="file"] {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 1px dashed rgba(255, 255, 255, 0.22);
+
+    background: rgba(0, 0, 0, 0.16);
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* =========================================================
+   UPLOAD PERSONALIZADO
+   - Contenedor del botón + nombre del archivo
+========================================================= */
+.file-upload {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+
+    margin-top: 8px;
+    padding: 18px;
+    border-radius: 16px;
+    border: 1px dashed rgba(255, 255, 255, 0.22);
+
+    background: rgba(0, 0, 0, 0.14);
+}
+
+/* Oculta el input file real */
+.file-upload input[type="file"] {
+    display: none;
+}
+
+/* Nombre del archivo */
+.file-name {
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    font-size: 16px;
+    letter-spacing: 0.3px;
+    color: rgba(255, 255, 255, 0.85);
+    opacity: 0.9;
+}
+
+/* =========================================================
+   BOTÓN PUNK
+   - Botón principal con efecto de brillo en hover
+========================================================= */
+.btn-punk {
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+
+    width: 100%;
+    margin-top: 6px;
+    padding: 16px 22px;
+
+    border-radius: 18px;
+    border: 1px solid rgba(255, 0, 255, 0.55);
+
+    background: rgba(0, 0, 0, 0.18);
+    color: rgba(255, 255, 255, 0.95);
+
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+
+    box-shadow: 0 0 0 0 transparent;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+
+    transition: all 0.2s ease-in;
+}
+
+/* Brillo animado interno */
+.btn-punk::before {
+    content: "";
+    position: absolute;
+    top: 7%;
+    left: 0%;
+    display: block;
+
+    width: 0;
+    height: 86%;
+    opacity: 0;
+
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 0 50px 28px rgba(255, 255, 255, 0.85);
+    transform: skewX(-20deg);
+}
+
+/* Hover */
+.btn-punk:hover {
+    background: linear-gradient(135deg, rgba(255, 0, 255, 0.78), rgba(0, 255, 255, 0.45));
+    border-color: rgba(0, 255, 255, 0.55);
+    box-shadow:
+        0 0 30px 6px rgba(255, 0, 255, 0.28),
+        0 0 30px 6px rgba(0, 255, 255, 0.18);
+    transition: all 0.2s ease-out;
+}
+
+.btn-punk:hover::before {
+    animation: sh02 0.5s linear;
+}
+
+/* Active */
+.btn-punk:active {
+    transform: translateY(1px);
+    box-shadow: 0 0 0 0 transparent;
+    transition: box-shadow 0.2s ease-in;
+}
+
+/* Focus accesible */
+.btn-punk:focus-visible {
+    outline: 2px solid rgba(0, 255, 255, 0.85);
+    outline-offset: 4px;
+    border-radius: 16px;
+}
+
+/* =========================================================
+   BOTÓN DE ARCHIVO
+   - Reutiliza btn-punk, pero adaptado para inline
+========================================================= */
+.btn-file {
+    flex: 0 0 auto;
+    width: auto;
+    margin-top: 0;
+    padding: 14px 18px;
+    border-radius: 14px;
+    font-size: 14px;
+}
+
+/* =========================================================
+   ANIMACIÓN DEL BRILLO
+========================================================= */
+@keyframes sh02 {
+    from {
+        opacity: 0;
+        left: 0%;
+    }
+    50% {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+        left: 100%;
+    }
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+@media (max-width: 900px) {
+    .profile-glass {
+        max-width: 92vw;
+        padding: 28px;
+    }
+
+    .form-title {
+        font-size: 26px;
+    }
+
+    .form-group label {
+        font-size: 16px;
+    }
+
+    .profile-glass input[type="text"],
+    .profile-glass input[type="email"],
+    .profile-glass input[type="password"] {
+        padding: 14px;
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 560px) {
+    .profile-glass {
+        padding: 22px;
+        border-radius: 18px;
+    }
+
+    .form-title {
+        font-size: 20px;
+    }
+
+    .file-upload {
+        flex-wrap: wrap;
+    }
+
+    .file-name {
+        white-space: normal;
+    }
+}

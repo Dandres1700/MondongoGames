@@ -1,12 +1,11 @@
 ﻿{% extends "games/base.html" %}
 {% load static %}
-
 {% block content %}
-
-<canvas id="bgCanvas"></canvas>
-
+{% block extra_css %}
+<link rel="preload" as="style" href="{% static 'games/css/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'games/css/dashboard.css' %}">
+{% endblock %}
 <div class="dashboard-wrapper">
-
     <aside class="sidebar">
         <div class="leftBar">
             <div class="profileBox">
@@ -14,7 +13,7 @@
 
                 <div class="avatar">
                     {% if current_user_avatar_url %}
-                        <img src="{{ current_user_avatar_url }}" class="avatar-img">
+                        <img src="{{ current_user_avatar_url }}" class="avatar-img" loading="lazy" decoding="async">
                     {% else %}
                         <span class="avatar-letter">
                             {{ request.user.username|first|upper }}
@@ -40,6 +39,21 @@
             <a href="?categoria=Arcade"
             class="categoria-btn {% if request.GET.categoria == 'Arcade' %}activo{% endif %}">
             Arcade
+            </a>
+
+            <a href="?categoria=Science Fiction"
+            class="categoria-btn {% if request.GET.categoria == 'Science Fiction' %}activo{% endif %}">
+            Science Fiction
+            </a>
+
+            <a href="?categoria=Shooter"
+            class="categoria-btn {% if request.GET.categoria == 'Shooter' %}activo{% endif %}">
+            Shooter
+            </a>
+
+            <a href="?categoria=Platformer"
+            class="categoria-btn {% if request.GET.categoria == 'Platformer' %}activo{% endif %}">
+            Platformer
             </a>
 
             <a href="{% url 'dashboard' %}"
@@ -94,10 +108,10 @@
         <!-- TARJETAS -->
         <div class="cards">
             {% for juego in juegos %}
-                <div class="card" data-click-sfx data-url="{% url 'juego' juego.nombre %}" data-img="{%static juego.imagen %}">
+                <div class="card" data-click-sfx data-url="{% url 'juego' juego.nombre %}" data-img="{{ juego.imagen }}">
 
                     <div class="imgBox">
-                        <img src="{% static juego.imagen %}" alt="">
+                        <img src="{{ juego.imagen }}" loading="lazy" decoding="async">
                     </div>
 
                     <div class="textBox">
@@ -122,121 +136,50 @@
     </a>
 </div>
 
-<audio id="bgMusic" loop>
+<audio id="bgMusic" loop preload="none">
     <source src="{{ ui_audio.bg_music }}" type="audio/mpeg">
 </audio>
-<audio id="clickSfx" preload="auto">
+<audio id="clickSfx" preload="none">
     <source src="{{ ui_audio.dashboard_sonido }}" type="audio/mpeg">
 </audio>
-<audio id="uiHoverSfx" preload="auto">
+<audio id="uiHoverSfx" preload="none">
     <source src="{{ ui_audio.dashboard_sonido }}" type="audio/mpeg">
 </audio>
+
 <script>
-const canvas = document.getElementById("bgCanvas");
-const ctx = canvas.getContext("2d");
-
-function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-}
-resizeCanvas();
-window.addEventListener("resize", resizeCanvas);
-
-let mouse = { x: null, y: null };
-
-window.addEventListener("mousemove", (e) => {
-    mouse.x = e.clientX;
-    mouse.y = e.clientY;
-});
-
-let particles = [];
-
-function randomColor() {
-    const colors = [
-        [255, 0, 200],
-        [0, 255, 255],
-        [180, 0, 255],
-        [255, 100, 200],
-        [0, 180, 255]
-    ];
-    return colors[Math.floor(Math.random() * colors.length)];
+function prefetchUrl(url, asType) {
+    if (!url) return;
+    const key = "prefetch:" + url;
+    if (document.head.querySelector(`link[data-prefetch='${key}']`)) return;
+    const link = document.createElement("link");
+    link.rel = "prefetch";
+    link.href = url;
+    link.as = asType || "document";
+    link.dataset.prefetch = key;
+    document.head.appendChild(link);
 }
 
-for (let i = 0; i < 18; i++) {
-    particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        radius: Math.random() * 180 + 120,
-        dx: (Math.random() - 0.5) * 0.2,
-        dy: (Math.random() - 0.5) * 0.2,
-        baseColor: randomColor(),
-        colorShift: Math.random() * 100
-    });
-}
-
-function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    particles.forEach(p => {
-
-        // Movimiento base
-        p.x += p.dx;
-        p.y += p.dy;
-
-        // InteracciÃ³n con mouse
-        if (mouse.x && mouse.y) {
-            let dx = mouse.x - p.x;
-            let dy = mouse.y - p.y;
-            let distance = Math.sqrt(dx * dx + dy * dy);
-
-            if (distance < 300) {
-                p.x -= dx * 0.002;
-                p.y -= dy * 0.002;
-            }
-        }
-
-        // Reposicionar si sale
-        if (p.x < -300) p.x = canvas.width + 300;
-        if (p.x > canvas.width + 300) p.x = -300;
-        if (p.y < -300) p.y = canvas.height + 300;
-        if (p.y > canvas.height + 300) p.y = -300;
-
-        // Cambio suave de color
-        let r = p.baseColor[0] + Math.sin(Date.now() * 0.001 + p.colorShift) * 30;
-        let g = p.baseColor[1] + Math.sin(Date.now() * 0.001 + p.colorShift) * 30;
-        let b = p.baseColor[2] + Math.sin(Date.now() * 0.001 + p.colorShift) * 30;
-
-        const gradient = ctx.createRadialGradient(
-            p.x, p.y, 0,
-            p.x, p.y, p.radius
-        );
-
-        gradient.addColorStop(0, `rgba(${r},${g},${b},0.35)`);
-        gradient.addColorStop(1, "transparent");
-
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fill();
-    });
-
-    requestAnimationFrame(animate);
-}
-
-animate();
-</script>
-<script>
-    const bgMusic = document.getElementById("bgMusic");
-    bgMusic.volume = 0.12;
-
-    document.addEventListener("click", () => {
-        if (bgMusic.paused) {
-            bgMusic.play();
-        }
-    }, { once: true });
-</script>
-<script>
 document.querySelectorAll(".card").forEach(card => {
+    const url = card.dataset.url;
+    if (url) {
+        card.addEventListener("mouseenter", () => prefetchUrl(url), { passive: true });
+        card.addEventListener("touchstart", () => prefetchUrl(url), { passive: true });
+    }
+
+    // Prefetch remoto para juegos externos pesados (mejora 1ra carga).
+    const gameName = (card.querySelector(".head")?.innerText || "").trim().toLowerCase();
+    const remoteHtmlByGame = {
+        "agent p: rebel spy": "https://mukvhdxlmtjdpbpodfht.supabase.co/storage/v1/object/public/games/external/agent_p_rebel_spy/content/play.disney.com/html5/phf_spl_plt_agentprebelspy/index_local2.html",
+        "regular show: fist punch": "https://mukvhdxlmtjdpbpodfht.supabase.co/storage/v1/object/public/games/external/regular_show_fist_punch/content/files.numuki.com/games/regular-show/fist-punch/index2.html",
+        "regular show: battle of the behemoths": "https://mukvhdxlmtjdpbpodfht.supabase.co/storage/v1/object/public/games/external/regular_show_battle_of_the_behemoths/content/emea.iframed.cn.dmti.cloud/content/1155/game/battle-of-the-behemoths/ae/battleofbehemoths-160818/index2.html",
+        "sky streaker": "https://mukvhdxlmtjdpbpodfht.supabase.co/storage/v1/object/public/games/external/sky_streaker/content/emea.iframed.cn.dmti.cloud/content/20/game/sky-streaker/za/skystreaker-150718-en/index2.html?desktop=1&v=20260303-3",
+    };
+    const remoteUrl = remoteHtmlByGame[gameName];
+    if (remoteUrl) {
+        card.addEventListener("mouseenter", () => prefetchUrl(remoteUrl), { passive: true });
+        card.addEventListener("touchstart", () => prefetchUrl(remoteUrl), { passive: true });
+    }
+
     card.addEventListener("click", function() {
 
         let nombre = this.querySelector(".head").innerText;
@@ -257,9 +200,7 @@ document.querySelectorAll(".card").forEach(card => {
         localStorage.setItem("recientes", JSON.stringify(recientes));
 
         // ===== REDIRIGIR =====
-        setTimeout(() => {
-            window.location.href = url;
-        }, 300);
+        window.location.href = url;
     });
 });
 </script>
@@ -271,7 +212,7 @@ panel.innerHTML = "";
 recientes.forEach(j => {
     panel.innerHTML += `
         <div class="recent-card" data-click-sfx onclick="location.href='${j.url}'">
-            <img src="${j.img}">
+            <img src="${j.img}" loading="lazy" alt="${j.nombre}">
             <span>${j.nombre}</span>
         </div>
     `;
@@ -343,5 +284,3 @@ function toggleSupport() {
 })();
 </script>
 {% endblock %}
-
-

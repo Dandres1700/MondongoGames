@@ -136,8 +136,8 @@ class DashboardTests(TestCase):
 
     def _mock_juego_queryset(self):
         juegos = [
-            SimpleNamespace(id_juego=1, titulo="Space Invaders", genero="Acción"),
-            SimpleNamespace(id_juego=2, titulo="Wall Blood", genero="Aventura"),
+            SimpleNamespace(id_juego=1, titulo="One Hit Kill", genero="Acción"),
+            SimpleNamespace(id_juego=2, titulo="Dungeon Spell", genero="Aventura"),
         ]
         qs = Mock()
         qs.order_by.return_value = juegos
@@ -146,25 +146,25 @@ class DashboardTests(TestCase):
     @patch("games.views.Juego.objects.all")
     def test_dashboard_search_filter(self, mock_all):
         mock_all.return_value = self._mock_juego_queryset()
-        response = self.client.get(reverse("dashboard"), {"q": "Space"})
+        response = self.client.get(reverse("dashboard"), {"q": "One"})
         juegos = response.context["juegos"]
         self.assertEqual(len(juegos), 1)
-        self.assertEqual(juegos[0]["nombre"], "Space Invaders")
+        self.assertEqual(juegos[0]["nombre"], "One Hit Kill")
 
     @patch("games.views.Juego.objects.all")
-    def test_dashboard_category_a_ventura_shows_space_invaders(self, mock_all):
+    def test_dashboard_category_a_ventura_shows_one_hit_kill(self, mock_all):
         mock_all.return_value = self._mock_juego_queryset()
         response = self.client.get(reverse("dashboard"), {"categoria": "Aventura"})
         nombres = [j["nombre"] for j in response.context["juegos"]]
-        self.assertIn("Space Invaders", nombres)
-        self.assertNotIn("Wall Blood", nombres)
+        self.assertIn("One Hit Kill", nombres)
+        self.assertNotIn("Dungeon Spell", nombres)
 
     @patch("games.views.Juego.objects.all")
     def test_dashboard_category_filter_supports_without_accent(self, mock_all):
         mock_all.return_value = self._mock_juego_queryset()
         response = self.client.get(reverse("dashboard"), {"categoria": "Accion"})
         nombres = [j["nombre"] for j in response.context["juegos"]]
-        self.assertIn("Wall Blood", nombres)
+        self.assertIn("Dungeon Spell", nombres)
 
 
 class RegistrarPartidaTests(TestCase):

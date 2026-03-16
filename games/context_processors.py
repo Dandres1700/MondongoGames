@@ -1,12 +1,20 @@
 import os
-
 from django.templatetags.static import static
-
+from django.conf import settings
 from supabase_cliente import get_public_storage_url
 
 
+def _resolve_avatar_url(value: str | None) -> str | None:
+    if not value:
+        return None
+    value = str(value).strip()
+    if value.startswith(("http://", "https://")):
+        return value
+    media_url = getattr(settings, "MEDIA_URL", "/media/") or "/media/"
+    return f"{media_url.rstrip('/')}/{value.lstrip('/')}"
+
 def current_user_avatar(request):
-    # Expone avatar listo para usar en todas las plantillas.
+    # Avatar de usuario (Supabase o fallback a MEDIA_URL si es ruta legacy).
     avatar_url = None
     try:
         user = getattr(request, "user", None)
@@ -14,16 +22,7 @@ def current_user_avatar(request):
             return {"current_user_avatar_url": None}
 
         if hasattr(user, "profile") and user.profile.avatar:
-            name = user.profile.avatar.name or ""
-            if name.startswith("http://") or name.startswith("https://"):
-                avatar_url = name
-            elif name.startswith("profiles/"):
-                # Si guardamos path de Storage, lo convertimos a URL publica.
-                bucket = os.getenv("SUPABASE_STORAGE_BUCKET_AVATARS", "avatars")
-                avatar_url = get_public_storage_url(bucket_name=bucket, object_path=name)
-            else:
-                # Compatibilidad con avatar legacy en media local.
-                avatar_url = user.profile.avatar.url
+            avatar_url = _resolve_avatar_url(user.profile.avatar)
     except Exception:
         avatar_url = None
 
@@ -56,3 +55,9 @@ def ui_audio_urls(request):
             urls[key] = fallback
 
     return {"ui_audio": urls}
+
+def supabase_public(request):
+    return {
+        "SUPABASE_URL": getattr(settings, "SUPABASE_URL", ""),
+        "SUPABASE_ANON_KEY": getattr(settings, "SUPABASE_ANON_KEY", ""),
+    }
