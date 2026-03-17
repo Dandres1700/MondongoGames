@@ -91,6 +91,18 @@ body::before {
     z-index: 1000;
 }
 
+/* Avatar pequeÃ±o SOLO en navbar (el del sidebar sigue grande) */
+.navbar .avatar,
+.navbar .nav-profile-avatar {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+    max-width: 34px !important;
+    max-height: 34px !important;
+    flex: 0 0 34px !important;
+}
+
 .nav-left h2 {
     font-family: 'Press Start 2P', monospace;
     font-size: 14px;
