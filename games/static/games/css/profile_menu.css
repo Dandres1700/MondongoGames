@@ -33,6 +33,11 @@
     z-index: 2001;
 }
 
+/* TamaÃ±o del botÃ³n de avatar SOLO en la navbar (no afecta sidebar) */
+.navbar .profile-menu .popup {
+    --burger-diameter: 34px;
+}
+
 /* Oculta el checkbox que controla el popup */
 .popup input {
     display: none;
@@ -104,26 +109,26 @@
 
 /* Avatar usado específicamente dentro del botón popup */
 .popup .burger.avatar.nav-profile-avatar {
-    width: 36px !important;
-    height: 36px !important;
-    min-width: 36px !important;
-    min-height: 36px !important;
-    max-width: 36px !important;
-    max-height: 36px !important;
-    flex: 0 0 36px !important;
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+    max-width: 34px !important;
+    max-height: 34px !important;
+    flex: 0 0 34px !important;
     border-radius: 50% !important;
     overflow: hidden !important;
 }
 
 /* Avatar pequeño en navbar (no afecta al avatar grande del sidebar) */
 .navbar .nav-profile-avatar {
-    width: 36px !important;
-    height: 36px !important;
-    min-width: 36px !important;
-    min-height: 36px !important;
-    max-width: 36px !important;
-    max-height: 36px !important;
-    flex: 0 0 36px !important;
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+    max-width: 34px !important;
+    max-height: 34px !important;
+    flex: 0 0 34px !important;
 }
 
 /* Imágenes dentro de avatares */
