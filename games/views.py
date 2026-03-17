@@ -45,6 +45,52 @@ def _supabase_auth_client():
     # Cliente por request para evitar sesiones compartidas entre usuarios.
     return create_supabase_auth_client()
 
+def _resolve_email_from_supabase_username(username: str) -> str | None:
+    # Busca en Supabase Auth (admin) por username guardado en user_metadata.
+    # Requiere SUPABASE_SERVICE_ROLE_KEY en el entorno.
+    username = (username or "").strip()
+    if not username:
+        return None
+    url = os.environ.get("SUPABASE_URL", "").rstrip("/")
+    key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
+    if not url or not key:
+        return None
+
+    target = username.lower()
+    headers = {
+        "Authorization": f"Bearer {key}",
+        "apikey": key,
+    }
+    # Paginamos por seguridad (por si hay muchos usuarios).
+    page = 1
+    per_page = 200
+    try:
+        with httpx.Client(timeout=10.0) as client:
+            while page <= 5:
+                resp = client.get(
+                    f"{url}/auth/v1/admin/users",
+                    params={"page": page, "per_page": per_page},
+                    headers=headers,
+                )
+                if resp.status_code != 200:
+                    return None
+                data = resp.json() or {}
+                users = data.get("users") or []
+                for u in users:
+                    email = (u.get("email") or "").strip()
+                    if email and email.lower() == target:
+                        return email
+                    meta = u.get("user_metadata") or {}
+                    meta_username = str(meta.get("username") or "").strip()
+                    if meta_username and meta_username.lower() == target:
+                        return email or None
+                if len(users) < per_page:
+                    break
+                page += 1
+    except Exception:
+        return None
+    return None
+
 
 def _absolute_site_url(request, path: str) -> str:
     # En producción usamos DJANGO_SITE_URL (Render). En local, el request.
@@ -189,6 +235,9 @@ def login_view(request):
                     usuario_row = None
                 if usuario_row and usuario_row.email:
                     email = usuario_row.email
+                else:
+                    # Si no existe localmente, buscar en Supabase Auth (metadata.username).
+                    email = _resolve_email_from_supabase_username(username_or_email) or ""
 
         if not email:
             messages.error(request, "Usuario no encontrado")
