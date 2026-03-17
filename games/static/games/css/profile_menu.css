@@ -104,15 +104,26 @@
 
 /* Avatar usado específicamente dentro del botón popup */
 .popup .burger.avatar.nav-profile-avatar {
-    width: 62px !important;
-    height: 62px !important;
-    min-width: 62px !important;
-    min-height: 62px !important;
-    max-width: 62px !important;
-    max-height: 62px !important;
-    flex: 0 0 62px !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    max-width: 36px !important;
+    max-height: 36px !important;
+    flex: 0 0 36px !important;
     border-radius: 50% !important;
     overflow: hidden !important;
+}
+
+/* Avatar pequeño en navbar (no afecta al avatar grande del sidebar) */
+.navbar .nav-profile-avatar {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    max-width: 36px !important;
+    max-height: 36px !important;
+    flex: 0 0 36px !important;
 }
 
 /* Imágenes dentro de avatares */
