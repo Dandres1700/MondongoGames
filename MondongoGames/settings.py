@@ -49,6 +49,13 @@ ALLOWED_HOSTS = [
     if host.strip()
 ]
 
+# CSRF trusted origins for secure POSTs behind a custom domain.
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",")
+    if origin.strip()
+]
+
 
 # Application definition
 
