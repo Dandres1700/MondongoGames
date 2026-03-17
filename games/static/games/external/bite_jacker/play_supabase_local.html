@@ -44,7 +44,14 @@
       if (typeof window.RufflePlayer === "undefined") return false;
       var ruffle = window.RufflePlayer.newest();
       var player = ruffle.createPlayer();
-      player.style.width = "100%";
+            player.config = {
+        autoplay: "on",
+        unmuteOverlay: "hidden",
+        letterbox: "on",
+        quality: "low",
+        logLevel: "error"
+      };
+player.style.width = "100%";
       player.style.height = "100%";
       host.innerHTML = "";
       host.appendChild(player);
