@@ -99,12 +99,18 @@
     const hoverSound = document.getElementById("hoverSound");
     const slider = document.getElementById("volumeSlider");
 
-    hoverSound.volume = 0.75;
+    hoverSound.volume = 0.5;
+    let lastHover = 0;
+    const HOVER_COOLDOWN = 120;
 
     const hoverTargets = document.querySelectorAll("input, button, a");
 
     hoverTargets.forEach(el => {
         el.addEventListener("mouseenter", () => {
+            const now = Date.now();
+            if (now - lastHover < HOVER_COOLDOWN) return;
+            if (!hoverSound.paused) return;
+            lastHover = now;
             hoverSound.currentTime = 0;
             hoverSound.play().catch(()=>{});
         });

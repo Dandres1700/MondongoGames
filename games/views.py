@@ -521,6 +521,7 @@ def juego(request, nombre):
             "nombre": juego_db.titulo,
             "juego_id": juego_db.id_juego,
             "disable_realtime_ui": False,
+            "disable_global_music": True,
         },
     )
 
@@ -1334,4 +1335,11 @@ def api_notifications_mark_all_read(request):
 
 def jugar(request, slug):
     juego = get_object_or_404(Juego, slug=slug, activo=True)
-    return render(request, "games/jugar.html", {"juego": juego})
+    return render(
+        request,
+        "games/jugar.html",
+        {
+            "juego": juego,
+            "disable_global_music": True,
+        },
+    )

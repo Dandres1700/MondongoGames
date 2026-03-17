@@ -121,9 +121,11 @@
     <source src="{{ ui_audio.hover_card }}" type="audio/mpeg">
 </audio>
 
+{% if not disable_global_music %}
 <audio id="globalMusic" loop preload="metadata">
     <source src="{% static 'games/sounds/music_fondo_todo.mp3' %}" type="audio/mpeg">
 </audio>
+{% endif %}
 
 <script>
     /* ===== CERRAR DROPDOWN PERFIL AL CLIC AFUERA ===== */
@@ -174,22 +176,28 @@ if (cerrarSesionBtn && logoutForm) {
 }
 
 const hoverSound = document.getElementById("hoverCardSound");
-hoverSound.volume = 0.25;
+const disableBaseHover = window.MG_DISABLE_BASE_HOVER === true;
+if (hoverSound && !disableBaseHover) {
+    hoverSound.volume = 0.25;
 
-let lastHoverTime = 0;
-const HOVER_DELAY = 120; // ms (evita spam)
+    let lastHoverTime = 0;
+    const HOVER_DELAY = 120; // ms (evita spam)
 
-document.querySelectorAll(".card").forEach(card => {
-    card.addEventListener("mouseenter", () => {
-        const now = Date.now();
+    document.querySelectorAll(".card").forEach(card => {
+        card.addEventListener("mouseenter", () => {
+            const now = Date.now();
 
-        if (now - lastHoverTime > HOVER_DELAY) {
-            hoverSound.currentTime = 0;
-            hoverSound.play().catch(()=>{});
-            lastHoverTime = now;
-        }
+            if (now - lastHoverTime > HOVER_DELAY) {
+                if (!hoverSound.paused) {
+                    return;
+                }
+                hoverSound.currentTime = 0;
+                hoverSound.play().catch(()=>{});
+                lastHoverTime = now;
+            }
+        });
     });
-});
+}
 </script>
 
 {% if not disable_realtime_ui %}
@@ -320,9 +328,11 @@ document.querySelectorAll(".card").forEach(card => {
 <script src="{% static 'games/js/messenger_panels.js' %}?v=20260311-2" defer></script>
 {% endif %}
 
+{% if not disable_global_music %}
 <script>
 (function () {
     const audio = document.getElementById("globalMusic");
+    const slider = document.getElementById("volumeSlider");
     if (!audio) return;
 
     const savedVolume = parseFloat(localStorage.getItem("global_music_volume") || "0.12");
@@ -353,6 +363,15 @@ document.querySelectorAll(".card").forEach(card => {
     document.addEventListener("click", startMusic, { once: true });
     document.addEventListener("keydown", startMusic, { once: true });
 
+    if (slider) {
+        slider.value = localStorage.getItem("global_music_volume") || "0.12";
+        slider.addEventListener("input", function () {
+            const v = Math.max(0, Math.min(1, parseFloat(this.value)));
+            audio.volume = v;
+            localStorage.setItem("global_music_volume", v);
+        });
+    }
+
     window.globalMusicControl = {
         play: startMusic,
         pause: function () {
@@ -370,5 +389,6 @@ document.querySelectorAll(".card").forEach(card => {
     };
 })();
 </script>
+{% endif %}
 </body>
 </html>
