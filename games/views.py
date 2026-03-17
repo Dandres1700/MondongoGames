@@ -46,6 +46,13 @@ def _supabase_auth_client():
     return create_supabase_auth_client()
 
 
+def _absolute_site_url(request, path: str) -> str:
+    # En producción usamos DJANGO_SITE_URL (Render). En local, el request.
+    if getattr(settings, "SITE_URL", ""):
+        return f"{settings.SITE_URL}{path}"
+    return request.build_absolute_uri(path)
+
+
 def _normalize_username(value: str) -> str:
     raw = (value or "").strip()
     if not raw:
@@ -252,11 +259,15 @@ def register_view(request):
 
         try:
             auth_client = _supabase_auth_client()
+            email_redirect_to = _absolute_site_url(request, "/")
             auth_resp = auth_client.auth.sign_up(
                 {
                     "email": email,
                     "password": password1,
-                    "options": {"data": {"username": username}},
+                    "options": {
+                        "data": {"username": username},
+                        "email_redirect_to": email_redirect_to,
+                    },
                 }
             )
         except AuthWeakPasswordError as exc:
@@ -294,8 +305,9 @@ def password_reset_request_view(request):
 
         try:
             auth_client = _supabase_auth_client()
-            redirect_url = request.build_absolute_uri(
-                reverse("password_reset_confirm")
+            redirect_url = _absolute_site_url(
+                request,
+                reverse("password_reset_confirm"),
             )
             auth_client.auth.reset_password_for_email(
                 email,

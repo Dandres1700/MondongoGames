@@ -73,8 +73,11 @@ def sync_supabase_auth_user(sender, instance, created, **kwargs):
         anon_client = create_supabase_auth_client()
         redirect_url = os.getenv(
             "SUPABASE_RESET_REDIRECT_URL",
-            "http://localhost:8000/password-reset/confirm/",
+            "",
         )
+        if not redirect_url:
+            base = os.getenv("DJANGO_SITE_URL", "http://localhost:8000").rstrip("/")
+            redirect_url = f"{base}/password-reset/confirm/"
         anon_client.auth.reset_password_for_email(
             email,
             options={"redirect_to": redirect_url},

@@ -40,6 +40,9 @@ SECRET_KEY = os.getenv(
     "django-insecure-#t4^8r))i1zjx*he*q)wy@2b86(7xchnycmekt5#jxh_h52*7*",
 )
 
+# Public base URL for building absolute links (Render domain in prod).
+SITE_URL = os.getenv("DJANGO_SITE_URL", "").strip().rstrip("/")
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = _env_bool("DJANGO_DEBUG", default=True)
 
