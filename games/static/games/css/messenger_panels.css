@@ -1,6 +1,7 @@
 /* =========================================================
    VARIABLES GLOBALES
-   - Medidas, colores y sombras base del sistema MG
+   Aquí se guardan colores, tamaños, bordes y sombras
+   que se van a reutilizar en todo el sistema de paneles.
 ========================================================= */
 :root {
     --mg-panel-w: 360px;
@@ -26,19 +27,22 @@
 
 /* =========================================================
    BACKDROP
-   - Fondo oscuro detrás de paneles abiertos
+   Es el fondo oscuro que aparece detrás del panel cuando se abre.
+   Sirve para que el usuario se enfoque en el panel y también
+   para dar sensación de modal o ventana flotante.
 ========================================================= */
 .mg-backdrop {
     position: fixed;
     inset: 0;
     z-index: 1500;
-
     background: rgba(0, 0, 0, 0.45);
     opacity: 0;
+    /* Mientras está oculto, no se puede interactuar con él */
     pointer-events: none;
     transition: var(--mg-transition);
 }
 
+/* Cuando el backdrop está activo, se ve y se puede usar */
 .mg-backdrop.show {
     opacity: 1;
     pointer-events: auto;
@@ -46,41 +50,38 @@
 
 /* =========================================================
    PANEL BASE
-   - Estructura general para chat, amigos y notificaciones
+   Este es el estilo principal de los paneles:
+   mensajes, amigos y notificaciones.
+   Aquí se define su forma, posición, fondo y animación.
 ========================================================= */
 .mg-panel {
     position: fixed;
     top: 78px;
     right: 18px;
     z-index: 2000;
-
     width: var(--mg-panel-w);
     height: calc(100vh - 110px);
     overflow: hidden;
     isolation: isolate;
-
     background: var(--mg-panel-bg);
     -webkit-backdrop-filter: blur(20px);
     backdrop-filter: blur(20px);
-
     border: 1px solid var(--mg-panel-border);
     border-radius: var(--mg-radius-lg);
     box-shadow: var(--mg-shadow);
-
     opacity: 0;
     pointer-events: none;
     transform: translateX(16px);
     transition: var(--mg-transition);
 }
 
-/* Glow decorativo detrás del panel */
+/* Esta capa crea un brillo decorativo detrás del panel */
 .mg-panel::before {
     content: "";
     position: absolute;
     inset: -2px;
     z-index: 0;
     pointer-events: none;
-
     border-radius: 22px;
     background: linear-gradient(
         120deg,
@@ -106,7 +107,9 @@
 
 /* =========================================================
    MODO JUEGO
-   - Paneles flotantes encima del juego
+   Estos estilos se aplican cuando el usuario está dentro de un juego.
+   Aquí los paneles pasan a ser más flotantes y se acomodan
+   para no estorbar tanto la vista del juego.
 ========================================================= */
 .game-view #messagesPanel,
 .game-view #friendsPanel,
@@ -115,25 +118,29 @@
     right: 24px;
     left: auto;
     z-index: 2700;
-
+    /* En modo juego el panel se adapta un poco mejor al ancho de pantalla */
     width: min(390px, 34vw);
     min-width: 320px;
     max-width: 420px;
     height: min(72vh, 680px);
 }
 
+/* Evita seleccionar texto accidentalmente al arrastrar el panel de mensajes */
 .game-view #messagesPanel {
     user-select: none;
 }
 
+/* El encabezado del panel se puede agarrar para moverlo */
 .game-view #messagesPanel .mg-panel__head {
     cursor: grab;
 }
 
+/* Mientras se arrastra, cambia el cursor */
 .game-view #messagesPanel.mg-dragging .mg-panel__head {
     cursor: grabbing;
 }
 
+/* Pero dentro del chat sí se puede seleccionar y usar inputs/botones normal */
 .game-view #messagesPanel .mg-panel__search,
 .game-view #messagesPanel .mg-split,
 .game-view #messagesPanel .mg-chat__composer,
@@ -143,24 +150,28 @@
     user-select: auto;
 }
 
+/* Cuando el panel está minimizado en modo juego, desaparece */
 .game-view #messagesPanel.mg-panel--minimized {
     opacity: 0 !important;
     pointer-events: none !important;
     transform: translateX(18px) scale(0.98) !important;
 }
 
+/* Hace visible la pestaña lateral para volver a abrir el chat */
 .game-view .mg-dock-tab.show {
     opacity: 1;
     pointer-events: auto;
     transform: translateY(-50%) translateX(0);
 }
 
+/* En modo juego no se usa backdrop para no tapar la vista */
 .game-view .mg-backdrop {
     display: none !important;
 }
 
 /* =========================================================
    CABECERA DEL PANEL
+   Parte superior del panel donde está el título y el botón cerrar.
 ========================================================= */
 .mg-panel__head {
     display: flex;
@@ -203,6 +214,7 @@
 
 /* =========================================================
    BUSCADOR DEL PANEL
+   Zona donde está el input para buscar amigos, chats, etc.
 ========================================================= */
 .mg-panel__search {
     padding: 8px 10px;
@@ -231,7 +243,9 @@
 
 /* =========================================================
    SPLIT DEL CHAT
-   - Lista izquierda + conversación derecha
+   Divide el panel de mensajes en dos partes:
+   izquierda = lista de chats
+   derecha = conversación actual
 ========================================================= */
 .mg-split {
     display: flex;
@@ -258,6 +272,8 @@
 
 /* =========================================================
    TABS
+   Son los botones tipo pestañas:
+   chats, solicitudes, agregar amigo, etc.
 ========================================================= */
 .mg-left__tabs {
     display: flex;
@@ -310,6 +326,7 @@
     gap: 6px;
 }
 
+/* Cuando hay solicitudes pendientes, resalta */
 .mg-tab--requests.has-pending {
     border-color: rgba(255, 0, 255, 0.28);
     box-shadow: 0 0 12px rgba(255, 0, 255, 0.10);
@@ -341,6 +358,8 @@
 
 /* =========================================================
    LISTAS
+   Contenedores donde se muestran chats, amigos, solicitudes
+   o notificaciones.
 ========================================================= */
 .mg-list,
 .mg-friends,
@@ -371,7 +390,7 @@
     gap: 10px;
 }
 
-/* Scrollbar custom */
+/* Scroll personalizado */
 .mg-list::-webkit-scrollbar,
 .mg-chat__body::-webkit-scrollbar,
 .mg-friends::-webkit-scrollbar,
@@ -390,6 +409,7 @@
 
 /* =========================================================
    ESTADOS VACÍOS
+   Esto aparece cuando no hay chats, no hay solicitudes, etc.
 ========================================================= */
 .mg-empty {
     padding: 14px 12px;
@@ -408,6 +428,7 @@
     animation: mgScan 1.1s linear infinite;
 }
 
+/* Animación de barrido */
 @keyframes mgScan {
     0% {
         transform: translateX(-20%);
@@ -424,6 +445,7 @@
 
 /* =========================================================
    ITEMS DE LISTA
+   Cada elemento individual: un amigo, un chat, etc.
 ========================================================= */
 .mg-item {
     display: flex;
@@ -476,6 +498,7 @@
 
 /* =========================================================
    CHAT
+   Estructura completa de la zona de conversación.
 ========================================================= */
 .mg-chat {
     display: flex;
@@ -489,6 +512,7 @@
     border-bottom: 1px solid rgba(0, 240, 255, 0.10);
 }
 
+/* Datos del usuario dentro de la cabecera */
 .mg-chat__user {
     display: flex;
     align-items: center;
@@ -517,6 +541,7 @@
     color: var(--mg-muted);
 }
 
+/* Estado vacío cuando no hay conversación seleccionada */
 .mg-chat-empty {
     padding: 14px;
     color: var(--mg-muted);
@@ -546,7 +571,10 @@
     padding: 12px 12px 18px;
 }
 
-/* Burbujas */
+/* =========================================================
+   BURBUJAS DE MENSAJE
+   Cada mensaje dentro de la conversación.
+========================================================= */
 .mg-bubble {
     max-width: 84%;
     padding: 9px 11px;
@@ -558,6 +586,7 @@
     animation: mgPop 0.12s ease;
 }
 
+/* Mensajes enviados por el usuario */
 .mg-bubble.me {
     align-self: flex-end;
     background: linear-gradient(135deg, #00ffff33, #ff00ff33);
@@ -567,12 +596,14 @@
         0 0 22px rgba(180, 0, 255, 0.10);
 }
 
+/* Mensajes del otro usuario */
 .mg-bubble.them {
     align-self: flex-start;
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
+/* Animación de aparición de los mensajes */
 @keyframes mgPop {
     from {
         transform: translateY(4px);
@@ -586,6 +617,7 @@
 
 /* =========================================================
    COMPOSER
+   Zona de abajo donde se escribe y se envía el mensaje.
 ========================================================= */
 .mg-chat__composer {
     position: sticky;
@@ -598,6 +630,7 @@
     border-top: 1px solid rgba(0, 240, 255, 0.12);
 }
 
+/* Input donde el usuario escribe el mensaje */
 .mg-chat__composer input {
     width: 100%;
     height: 46px;
@@ -628,6 +661,7 @@
         0 0 22px rgba(180, 0, 255, 0.10);
 }
 
+/* Botón de enviar */
 .mg-chat__composer button {
     position: absolute;
     top: 50%;
@@ -678,6 +712,7 @@
 
 /* =========================================================
    PANELES DE FRIENDS Y NOTIFICACIONES
+   Ajustes de posición para cuando se apilan con otro panel.
 ========================================================= */
 .mg-panel--friends,
 .mg-panel--notifications {
@@ -689,6 +724,7 @@
     right: calc(18px + var(--mg-panel-w) + 12px);
 }
 
+/* En modo juego se reposicionan distinto */
 .game-view .mg-panel--friends.mg-panel--stacked,
 .game-view .mg-panel--notifications.mg-panel--stacked {
     right: 24px;
@@ -696,6 +732,7 @@
 
 /* =========================================================
    FRIEND REQUESTS
+   Tarjetas o filas de solicitudes de amistad.
 ========================================================= */
 .mg-section-title {
     margin: 10px 0 6px;
@@ -749,8 +786,10 @@
     background: rgba(0, 0, 0, 0.08);
 }
 
+
 /* =========================================================
    MODAL AÑADIR AMIGO
+   Ventana emergente para enviar solicitud de amistad.
 ========================================================= */
 .mg-modal {
     position: fixed;
@@ -924,6 +963,7 @@
     transform: scale(0.99);
 }
 
+/* Mensaje de estado del modal, por ejemplo éxito o error */
 .mg-modal__status {
     min-height: 18px;
     margin-top: 14px;
@@ -934,6 +974,8 @@
 
 /* =========================================================
    TAB LATERAL DEL CHAT EN MODO JUEGO
+   Es la pestaña pequeña al costado que sirve para volver
+   a abrir el panel cuando fue minimizado.
 ========================================================= */
 .mg-dock-tab {
     position: fixed;
@@ -1008,12 +1050,14 @@
     transition: transform 0.15s ease;
 }
 
+/* Animación pequeña cuando cambia el número */
 .mg-unread-badge.bump {
     transform: scale(1.25);
 }
 
 /* =========================================================
    PANEL DE NOTIFICACIONES
+   Tarjetas individuales de cada notificación.
 ========================================================= */
 .mg-notification {
     position: relative;
@@ -1156,13 +1200,18 @@
 
 /* =========================================================
    AJUSTES DE NAV
+   Aquí se deja lista la base para botones del navbar
+   que tendrán badges o elementos encima.
 ========================================================= */
 .nav-icon-btn {
     position: relative;
 }
 
+
 /* =========================================================
    RESPONSIVE
+   Ajustes para pantallas más pequeñas, tablet o celular.
+   La idea es que los paneles sigan siendo usables.
 ========================================================= */
 @media (max-width: 920px) {
     .mg-panel {
@@ -1191,6 +1240,7 @@
         right: 50%;
         width: var(--mg-panel-w);
         height: calc(100vh - 96px);
+        /* Se centra horizontalmente */
         transform: translate(50%, 16px);
     }
 
@@ -1198,6 +1248,7 @@
         transform: translate(50%, 0);
     }
 
+    /* En móvil/tablet el chat se pone vertical en vez de lado a lado */
     .mg-split {
         flex-direction: column;
         height: calc(100% - 96px);

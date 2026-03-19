@@ -1,14 +1,19 @@
-
+// Función autoejecutable que encapsula toda la lógica de mensajes, amigos y notificaciones
+// para evitar contaminar el ámbito global y mantener organizado el script.
 (function(){
+  // Atajo para obtener elementos del DOM por id de forma más rápida.
   const $ = (id) => document.getElementById(id);
 
-  // Botones navbar
+  
+  // Referencias a los botones principales de la barra de navegación
+// y a los badges que muestran cantidades pendientes.
   const btnMessages = $("btnOpenContacts");
   const btnFriends = $("btnFriends");
   const friendsBadge = $("mgFriendsBadge");
   const requestsTabBadge = $("mgRequestsTabBadge");
 
-  // Paneles
+  // Referencias a los paneles flotantes de la interfaz,
+// sus botones de cierre, el backdrop y la pestaña dock de vista juego.
   const messagesPanel = $("messagesPanel");
   const friendsPanel  = $("friendsPanel");
   const backdrop      = $("mgBackdrop");
@@ -17,7 +22,8 @@
   const dockTab = $("mgDockTab");
   const isGameView = document.body.classList.contains("game-view");
 
-  // Mensajes UI
+  // Elementos visuales del módulo de mensajería:
+// lista de conversaciones, chat activo, formulario de envío y buscador.
   const threadsList = $("mgThreadsList");
   const chatEmpty   = $("mgChatEmpty");
   const chatWrap    = $("mgChat");
@@ -30,21 +36,22 @@
   const searchThreads = $("mgSearchThreads");
   const btnOpenFriendsFromMessages = $("btnOpenFriendsFromMessages");
 
-  // Amigos UI
+  // Elementos visuales del módulo de amistades:
+// listado de amigos, solicitudes y acciones relacionadas.
   const friendsList = $("mgFriendsList");
   const requestsBox = $("mgRequests");
   const incomingBox = $("mgIncoming");
   const outgoingBox = $("mgOutgoing");
   const btnOpenAddFriend = $("btnOpenAddFriend");
 
-    // Notificaciones UI
+  // Elementos del panel de notificaciones y su badge de avisos no leídos.
   const btnNotifications = $("btnNotifications");
   const notificationsPanel = $("notificationsPanel");
   const btnCloseNotifications = $("btnCloseNotifications");
   const notificationsList = $("mgNotificationsList");
   const notificationsBadge = $("mgNotificationsBadge");
 
-  // Modal añadir amigo
+  // Elementos del modal para buscar usuarios y enviar solicitudes de amistad.
   const addFriendModal = $("mgAddFriendModal");
   const addFriendForm  = $("mgAddFriendForm");
   const addFriendInput = $("mgAddFriendInput");
@@ -52,6 +59,7 @@
   const closeAddFriend = $("mgCloseAddFriend");
   const unreadBadge = $("mgUnreadBadge");
 
+  // Consulta la cantidad de mensajes no leídos y actualiza el badge correspondiente.
 async function refreshUnread(){
   try{
     const r = await api('/api/messages/unread-count/');
@@ -67,20 +75,24 @@ async function refreshUnread(){
   }
 }
 
-// refresca cada 2s
+// Refresco automático de badges para mantener sincronizada la interfaz con el servidor.
 setInterval(refreshUnread, 2000);
 refreshUnread();
-
+// También se actualizan periódicamente notificaciones y solicitudes de amistad.
 setInterval(refreshNotificationsBadge, 2000);
 refreshNotificationsBadge();
 
 setInterval(refreshFriendRequestsBadge, 2000);
 refreshFriendRequestsBadge();
 
+// Estado global del módulo:
+// activeChatUserId guarda el usuario del chat activo,
+// threadsCache almacena los hilos cargados,
+// y mgPollTimer controla la actualización automática del chat abierto.
   let activeChatUserId = null;
   let threadsCache = [];
   let mgPollTimer = null;
-
+// Estado temporal usado para arrastrar el panel de mensajes en la vista de juego.
   let dragState = {
     active: false,
     startX: 0,
@@ -92,6 +104,7 @@ refreshFriendRequestsBadge();
 if (chatInput) chatInput.disabled = true;
 if (sendBtn) sendBtn.disabled = true;
 
+// Obtiene el valor de una cookie del navegador, usado aquí para recuperar el CSRF token.
   function getCookie(name){
     const v = `; ${document.cookie}`;
     const parts = v.split(`; ${name}=`);
@@ -100,6 +113,8 @@ if (sendBtn) sendBtn.disabled = true;
   }
   const csrftoken = getCookie('csrftoken');
 
+  // Función auxiliar para centralizar peticiones al backend,
+// agregar headers, credenciales y manejo de errores.
   async function api(url, opts={}){
     const options = {
       headers: {
@@ -122,6 +137,7 @@ if (sendBtn) sendBtn.disabled = true;
     return j;
   }
 
+  // Ajusta la posición del panel de amigos para evitar superposición con otros paneles.
       function updateFriendsPanelPosition(){
     if(!friendsPanel || !messagesPanel) return;
 
@@ -138,28 +154,31 @@ if (sendBtn) sendBtn.disabled = true;
       friendsPanel.classList.remove('mg-panel--stacked');
     }
   }
-
+// Controla la pestaña dock que permite restaurar el panel de mensajes minimizado en vista juego.
   function showDockTab(){
     if(!dockTab || !isGameView) return;
     dockTab.classList.add("show");
   }
-
+  // Oculta la pestaña dock cuando el panel de mensajes vuelve a estar visible.
   function hideDockTab(){
     if(!dockTab || !isGameView) return;
     dockTab.classList.remove("show");
   }
 
+  // Verifica si el panel de mensajes se encuentra minimizado.
   function isMessagesMinimized(){
     return !!(messagesPanel && messagesPanel.classList.contains("mg-panel--minimized"));
   }
 
+  // Minimiza el panel de mensajes y muestra la pestaña dock para recuperarlo después.
   function minimizeMessagesPanel(){
     if(!messagesPanel) return;
     messagesPanel.classList.add("mg-panel--minimized");
     messagesPanel.setAttribute("aria-hidden", "true");
     showDockTab();
   }
-
+// Restaura el panel de mensajes minimizado.
+// En vista juego, cierra otros paneles para dejar visible solo uno.
   function restoreMessagesPanel(){
   if(!messagesPanel) return;
 
@@ -179,6 +198,7 @@ if (sendBtn) sendBtn.disabled = true;
   updateFriendsPanelPosition();
   updateNotificationsPanelPosition();
 }
+// Mantiene el panel de mensajes dentro del área visible de la ventana.
   function clampMessagesPanelToViewport(){
     if(!isGameView || !messagesPanel) return;
 
@@ -200,6 +220,7 @@ if (sendBtn) sendBtn.disabled = true;
     messagesPanel.style.top = `${top}px`;
     messagesPanel.style.right = "auto";
   }
+  // Consulta las solicitudes pendientes y actualiza sus indicadores visuales.
 async function refreshFriendRequestsBadge(){
   try{
     const r = await api('/api/friends/requests/');
@@ -232,6 +253,8 @@ async function refreshFriendRequestsBadge(){
     }
   }
 }
+
+// Habilita el arrastre manual del panel de mensajes en vista juego.
   function enableMessagesDragging(){
     if(!isGameView || !messagesPanel) return;
 
@@ -298,6 +321,8 @@ async function refreshFriendRequestsBadge(){
     window.addEventListener("resize", clampMessagesPanelToViewport);
   }
 
+  // Abre un panel según el contexto actual.
+// En vista juego solo se muestra un panel a la vez.
     function openPanel(panel){
   if(!panel) return;
 
@@ -342,12 +367,20 @@ async function refreshFriendRequestsBadge(){
   updateFriendsPanelPosition();
   updateNotificationsPanelPosition();
 }
+
+// Cierra un panel específico.
+// En vista juego, el panel de mensajes se minimiza en lugar de desaparecer.
     function closePanel(panel){
   if(!panel) return;
 
   if(isGameView){
     if(panel === messagesPanel){
       minimizeMessagesPanel();
+
+      if (mgPollTimer) {
+        clearInterval(mgPollTimer);
+        mgPollTimer = null;
+      }
     }else{
       panel.classList.remove('open');
       panel.setAttribute('aria-hidden','true');
@@ -373,7 +406,7 @@ async function refreshFriendRequestsBadge(){
     backdrop.classList.remove('show');
   }
 }
-
+// Cierra o minimiza todos los paneles visibles y detiene el polling del chat.
     function closeAll(){
   if(isGameView){
     messagesPanel.classList.remove('open');
@@ -400,7 +433,7 @@ async function refreshFriendRequestsBadge(){
     mgPollTimer = null;
   }
 }
-
+  // Eventos principales para abrir, cerrar y restaurar paneles desde la interfaz.
   if(backdrop) backdrop.addEventListener('click', closeAll);
   if(btnCloseMessages) btnCloseMessages.addEventListener('click', () => closePanel(messagesPanel));
   if(btnCloseFriends) btnCloseFriends.addEventListener('click', () => closePanel(friendsPanel));
@@ -431,7 +464,7 @@ async function refreshFriendRequestsBadge(){
     });
   }
 
-  // Tabs amigos
+  // Controla el cambio entre la pestaña de amigos y la pestaña de solicitudes.
   document.querySelectorAll('[data-friendtab]').forEach(btn => {
     btn.addEventListener('click', async () => {
       document.querySelectorAll('[data-friendtab]').forEach(b => b.classList.remove('is-active'));
@@ -451,6 +484,7 @@ async function refreshFriendRequestsBadge(){
 
   if(btnOpenAddFriend) btnOpenAddFriend.addEventListener('click', openAddFriendModal);
 
+  // Abre el modal para agregar amigos, limpia el estado previo y enfoca el input.
   function openAddFriendModal(){
     if(!addFriendModal) return;
     addFriendStatus.textContent = '';
@@ -459,18 +493,20 @@ async function refreshFriendRequestsBadge(){
     addFriendModal.setAttribute('aria-hidden','false');
     setTimeout(() => addFriendInput.focus(), 50);
   }
+  // Cierra el modal de agregar amigo.
   function closeAddFriendModal(){
     if(!addFriendModal) return;
     addFriendModal.classList.remove('open');
     addFriendModal.setAttribute('aria-hidden','true');
   }
   if(closeAddFriend) closeAddFriend.addEventListener('click', closeAddFriendModal);
+  // Permite cerrar el modal al hacer clic fuera de su contenido principal.
   if(addFriendModal){
     addFriendModal.addEventListener('click', (e) => {
       if(e.target === addFriendModal) closeAddFriendModal();
     });
   }
-
+  // Envía una solicitud de amistad al backend y refresca la interfaz si el envío fue exitoso.
   if(addFriendForm){
     addFriendForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -488,7 +524,7 @@ async function refreshFriendRequestsBadge(){
       }
     });
   }
-
+  // Carga desde el backend la lista de conversaciones disponibles.
   async function loadThreads(){
     if(!threadsList) return;
     threadsList.innerHTML = `<div class="mg-empty">Cargando...</div>`;
@@ -501,6 +537,7 @@ async function refreshFriendRequestsBadge(){
     }
   }
 
+  // Renderiza visualmente la lista de conversaciones y permite abrir cada chat.
   function renderThreads(list){
     if(!list || list.length === 0){
       threadsList.innerHTML = `<div class="mg-empty">No hay amigos añadidos. Agrega amigos para chatear.</div>`;
@@ -508,9 +545,6 @@ async function refreshFriendRequestsBadge(){
       chatInput.disabled = true;
       return;
     }
-    sendBtn.disabled = false;
-    chatInput.disabled = false;
-
     threadsList.innerHTML = '';
     list.forEach(t => {
       const u = t.user;
@@ -529,6 +563,7 @@ async function refreshFriendRequestsBadge(){
     });
   }
 
+  // Filtra localmente las conversaciones según el texto ingresado en el buscador.
   if(searchThreads){
     searchThreads.addEventListener('input', () => {
       const q = (searchThreads.value || '').toLowerCase().trim();
@@ -538,6 +573,7 @@ async function refreshFriendRequestsBadge(){
     });
   }
 
+  // Abre una conversación específica, carga sus mensajes y activa su actualización automática.
 async function openChat(userId){
   activeChatUserId = userId;
     // ✅ habilita composer al abrir chat
@@ -563,9 +599,16 @@ async function openChat(userId){
     if (mgPollTimer) clearInterval(mgPollTimer);
     mgPollTimer = setInterval(async () => {
       try{
+        const shouldStickToBottom =
+          chatBody.scrollHeight - chatBody.scrollTop - chatBody.clientHeight < 80;
+    
         const rr = await api(`/api/messages/thread/${userId}/`);
         renderMessages(rr.messages || []);
-        chatBody.scrollTop = chatBody.scrollHeight;
+    
+        if (shouldStickToBottom) {
+          chatBody.scrollTop = chatBody.scrollHeight;
+        }
+    
         await refreshUnread();
       }catch(e){}
     }, 1500);
@@ -575,6 +618,7 @@ async function openChat(userId){
   }
 }
 
+// Dibuja en pantalla los mensajes del chat actual, separando enviados y recibidos.
   function renderMessages(msgs){
     chatBody.innerHTML = '';
     if(!msgs.length){
@@ -589,6 +633,7 @@ async function openChat(userId){
     });
   }
 
+  // Envía un mensaje al usuario activo y actualiza visualmente la conversación.
   if(chatForm){
     chatForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -611,7 +656,7 @@ async function openChat(userId){
       }
     });
   }
-
+// Carga la lista de amigos confirmados y la muestra en el panel de amistades.
   async function loadFriends(){
     if(!friendsList) return;
     friendsList.innerHTML = `<div class="mg-empty">Cargando...</div>`;
@@ -633,9 +678,10 @@ async function openChat(userId){
             <div class="mg-item__last">${escapeHtml(u.email || '')}</div>
           </div>
         `;
+        // Al seleccionar un amigo, se abre directamente la conversación con ese usuario.
            div.addEventListener('click', async () => {
-          closePanel(friendsPanel);   // ✅ cierra amigos
-          openPanel(messagesPanel);   // ✅ abre chat en su lugar normal
+          closePanel(friendsPanel);   // cierra amigos
+          openPanel(messagesPanel);   // abre chat en su lugar normal
           await loadThreads();
           await openChat(u.id);
         });
@@ -646,6 +692,7 @@ async function openChat(userId){
     }
   }
 
+  // Carga y muestra las solicitudes de amistad recibidas y enviadas.
   async function loadRequests(){
     if(!incomingBox || !outgoingBox) return;
     incomingBox.innerHTML = `<div class="mg-empty">Cargando...</div>`;
@@ -657,6 +704,7 @@ async function openChat(userId){
         incomingBox.innerHTML = `<div class="mg-empty">No tienes solicitudes.</div>`;
       }else{
         incomingBox.innerHTML = '';
+        // Renderiza las solicitudes recibidas con opciones para aceptar o rechazar.
         r.incoming.forEach(item => {
           const u = item.from_user;
           const row = document.createElement('div');
@@ -721,7 +769,7 @@ async function openChat(userId){
       outgoingBox.innerHTML = `<div class="mg-empty">❌ ${err.message}</div>`;
     }
   }
-
+  // Escapa caracteres especiales antes de insertarlos en HTML.
   function escapeHtml(str){
     return String(str)
       .replaceAll('&','&amp;')
@@ -736,7 +784,7 @@ async function openChat(userId){
     enableMessagesDragging();
     showDockTab();
   }
-// ✅ ENTER envía (fallback si requestSubmit no existe)
+// Permite enviar el mensaje al presionar Enter, con compatibilidad para navegadores antiguos.
 if (chatInput && chatForm) {
   chatInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
@@ -752,6 +800,7 @@ if (chatInput && chatForm) {
   });
 }
 
+// Ajusta la posición del panel de notificaciones cuando coincide con otros paneles abiertos.
   function updateNotificationsPanelPosition(){
     if(!notificationsPanel || !messagesPanel || !friendsPanel) return;
 
@@ -786,7 +835,7 @@ if (chatInput && chatForm) {
 
     });
   }
-
+  // Consulta la cantidad de notificaciones no leídas y actualiza su badge visual.
     async function refreshNotificationsBadge(){
     try{
       const r = await api('/api/notifications/unread-count/');
@@ -801,6 +850,7 @@ if (chatInput && chatForm) {
     }
   }
 
+  // Carga la lista de notificaciones y define la acción que ejecutará cada una al hacer clic.
   async function loadNotifications(){
     if(!notificationsList) return;
     notificationsList.innerHTML = `<div class="mg-empty">Cargando...</div>`;
@@ -822,6 +872,7 @@ if (chatInput && chatForm) {
       }
 
       notificationsList.innerHTML = '';
+      // Construye cada notificación según su tipo, contenido y destino.
       list.forEach(n => {
   const div = document.createElement('div');
 
@@ -882,7 +933,7 @@ if (chatInput && chatForm) {
       notificationsList.innerHTML = `<div class="mg-empty">❌ ${err.message}</div>`;
     }
   }
-
+  // Convierte la fecha de la notificación a un formato legible para el usuario.
   function formatNotificationDate(dateStr){
     if(!dateStr) return '';
     const d = new Date(dateStr);
