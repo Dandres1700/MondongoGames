@@ -54,7 +54,7 @@ body {
     overflow-y: auto;
     padding-top: var(--nav-h);
 
-    background: url("/static/games/img/fondo_dashboard.png") no-repeat center center fixed;
+    background: url("../img/fondo_dashboard.png") no-repeat center center fixed;
     background-size: cover;
 }
 

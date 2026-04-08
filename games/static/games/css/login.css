@@ -92,7 +92,7 @@
     /* Imagen de fondo con una capa oscura encima */
     background:
         linear-gradient(rgba(5,0,20,0.75), rgba(5,0,20,0.85)),
-        url("/static/games/img/fondo_login.jpg");
+        url("../img/fondo_login.jpg");
 
     background-size:cover;
     background-position:center;
@@ -106,7 +106,7 @@
     content:"";
     position:absolute;
     inset:0;
-    background:url("/static/games/img/particles.png") repeat;
+    background:url("../img/particles.png") repeat;
     opacity:0.05;
     animation:particlesMove 40s linear infinite;
     pointer-events:none;
