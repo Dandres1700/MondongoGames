@@ -1,5 +1,6 @@
-﻿import os
+import os
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import OperationalError, ProgrammingError, models
 from django.db.models.signals import post_delete, post_save
@@ -35,6 +36,8 @@ def save_profile(sender, instance, **kwargs):
 @receiver(post_save, sender=User)
 def sync_supabase_auth_user(sender, instance, created, **kwargs):
     # Si el usuario se crea desde el admin o por script, replicarlo en Supabase Auth.
+    if getattr(settings, "OFFLINE_MODE", False):
+        return
     if not created:
         return
 
@@ -256,3 +259,4 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.title}"
+

@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 import os
+from urllib.parse import urlparse
 try:
     from dotenv import load_dotenv
 except ModuleNotFoundError:
@@ -26,6 +27,26 @@ def _env_bool(name: str, default: bool = False) -> bool:
     if value is None:
         return default
     return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _database_from_url(database_url: str) -> dict:
+    parsed = urlparse(database_url)
+    if parsed.scheme not in {"postgres", "postgresql"}:
+        raise ValueError("Only postgres DATABASE_URL is supported.")
+    return {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": (parsed.path or "/")[1:] or "postgres",
+        "USER": parsed.username or "",
+        "PASSWORD": parsed.password or "",
+        "HOST": parsed.hostname or "",
+        "PORT": str(parsed.port or "5432"),
+        "CONN_MAX_AGE": int(os.getenv("DB_CONN_MAX_AGE", "0" if DEBUG else "60")),
+        "OPTIONS": {
+            "sslmode": os.getenv("DB_SSLMODE", "require"),
+            "connect_timeout": int(os.getenv("DB_CONNECT_TIMEOUT", "10")),
+            "options": "-c search_path=public",
+        },
+    }
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -45,6 +66,7 @@ SITE_URL = os.getenv("DJANGO_SITE_URL", "").strip().rstrip("/")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = _env_bool("DJANGO_DEBUG", default=True)
+OFFLINE_MODE = _env_bool("DJANGO_OFFLINE_MODE", default=False)
 
 ALLOWED_HOSTS = [
     host.strip()
@@ -108,24 +130,29 @@ WSGI_APPLICATION = 'MondongoGames.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME', 'postgres'),
-        'USER': os.getenv('DB_USER', 'postgres'),
-        'PASSWORD': os.getenv('DB_PASSWORD', ''),
-        'HOST': os.getenv('DB_HOST', ''),
-        'PORT': os.getenv('DB_PORT', '5432'),
-        # En desarrollo evita agotar el pool de Supabase (session mode).
-        'CONN_MAX_AGE': int(os.getenv('DB_CONN_MAX_AGE', '0' if DEBUG else '60')),
-        'OPTIONS': {
-            'sslmode': os.getenv('DB_SSLMODE', 'require'),
-            'connect_timeout': int(os.getenv('DB_CONNECT_TIMEOUT', '10')),
-            'options': '-c search_path=public',
-        },
+DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
+if DATABASE_URL:
+    DATABASES = {"default": _database_from_url(DATABASE_URL)}
+elif os.getenv("DB_HOST", "").strip():
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv("DB_NAME", "postgres"),
+            "USER": os.getenv("DB_USER", "postgres"),
+            "PASSWORD": os.getenv("DB_PASSWORD", ""),
+            "HOST": os.getenv("DB_HOST", ""),
+            "PORT": os.getenv("DB_PORT", "5432"),
+            "CONN_MAX_AGE": int(os.getenv("DB_CONN_MAX_AGE", "0" if DEBUG else "60")),
+            "OPTIONS": {
+                "sslmode": os.getenv("DB_SSLMODE", "require"),
+                "connect_timeout": int(os.getenv("DB_CONNECT_TIMEOUT", "10")),
+                "options": "-c search_path=public",
+            },
+        }
     }
-}
+else:
+    # Local fallback when no Postgres variables are configured.
+    DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "db.sqlite3"}}
 
 
 # Password validation
@@ -183,6 +210,10 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 WHITENOISE_MAX_AGE = 31536000
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
+SESSION_COOKIE_SECURE = _env_bool("DJANGO_SESSION_COOKIE_SECURE", default=not DEBUG)
+CSRF_COOKIE_SECURE = _env_bool("DJANGO_CSRF_COOKIE_SECURE", default=not DEBUG)
 # Legacy local media (fallback). Avatares y capturas nuevas usan Supabase Storage.
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"

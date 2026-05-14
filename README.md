@@ -2,6 +2,19 @@
 
 Proyecto Django conectado a Supabase (Postgres + Storage).
 
+## Ejecutar en local y en Render
+
+- Local:
+1. Copia `.env.example` a `.env` y ajusta variables.
+2. Si no configuras `DATABASE_URL` ni `DB_HOST`, el proyecto usa `sqlite3` automáticamente (`db.sqlite3`).
+3. Ejecuta `python manage.py migrate` y luego `python manage.py runserver`.
+4. Si quieres trabajar sin internet, activa `DJANGO_OFFLINE_MODE=true` en `.env`.
+
+- Render:
+1. Usa `render.yaml` incluido en el repo.
+2. Configura en Render las variables marcadas con `sync: false` (sobre todo `DATABASE_URL` y llaves de Supabase).
+3. Para dominio propio, actualiza `DJANGO_ALLOWED_HOSTS` y `DJANGO_CSRF_TRUSTED_ORIGINS`.
+
 ## Storage actual (sin Base64)
 
 - Avatar de perfil: se guarda localmente en `media/avatars/`.

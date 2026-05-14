@@ -9,6 +9,7 @@ from datetime import date
 import httpx
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout
+from django.contrib.auth import authenticate
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.password_validation import validate_password
@@ -39,6 +40,10 @@ from supabase_cliente import (
     update_support_ticket_status,
 )
 User = get_user_model()
+
+
+def _is_offline_mode() -> bool:
+    return bool(getattr(settings, "OFFLINE_MODE", False))
 
 
 def _supabase_auth_client():
@@ -221,6 +226,18 @@ def login_view(request):
         username_or_email = (request.POST.get("username") or "").strip()
         password = request.POST.get("password")
 
+        if _is_offline_mode():
+            auth_user = authenticate(request, username=username_or_email, password=password)
+            if not auth_user and "@" in username_or_email:
+                found = User.objects.filter(email__iexact=username_or_email).first()
+                if found:
+                    auth_user = authenticate(request, username=found.username, password=password)
+            if not auth_user:
+                messages.error(request, "Credenciales incorrectas")
+                return redirect("login")
+            login(request, auth_user, backend="django.contrib.auth.backends.ModelBackend")
+            return redirect("dashboard")
+
         email = ""
         if "@" in username_or_email:
             email = username_or_email
@@ -306,6 +323,14 @@ def register_view(request):
             messages.error(request, "El correo ya está registrado")
             return redirect("register")
 
+        if _is_offline_mode():
+            if User.objects.filter(username__iexact=username).exists():
+                messages.error(request, "El nombre de usuario ya existe")
+                return redirect("register")
+            user = User.objects.create_user(username=username, email=email, password=password1)
+            login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+            return redirect("home")
+
         try:
             auth_client = _supabase_auth_client()
             email_redirect_to = _absolute_site_url(request, "/")
@@ -346,6 +371,13 @@ def register_view(request):
 
 
 def password_reset_request_view(request):
+    if _is_offline_mode():
+        messages.error(
+            request,
+            "Recuperación por correo deshabilitada en modo offline local.",
+        )
+        return redirect("login")
+
     if request.method == "POST":
         email = (request.POST.get("email") or "").strip().lower()
         if not email:
@@ -382,6 +414,13 @@ def password_reset_done_view(request):
 
 
 def password_reset_confirm_view(request):
+    if _is_offline_mode():
+        messages.error(
+            request,
+            "Cambio de contraseña por enlace deshabilitado en modo offline local.",
+        )
+        return redirect("login")
+
     if request.method == "POST":
         access_token = (request.POST.get("access_token") or "").strip()
         refresh_token = (request.POST.get("refresh_token") or "").strip()

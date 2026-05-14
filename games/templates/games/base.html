@@ -309,7 +309,9 @@ if (hoverSound && !disableBaseHover) {
     <div class="mg-modal__status" id="mgAddFriendStatus"></div>
   </div>
 </div>
+{% if not OFFLINE_MODE %}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+{% endif %}
 <script>
   window.MG_SUPABASE_URL = "{{ SUPABASE_URL|escapejs }}";
   window.MG_SUPABASE_ANON_KEY = "{{ SUPABASE_ANON_KEY|escapejs }}";

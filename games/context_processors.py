@@ -60,4 +60,5 @@ def supabase_public(request):
     return {
         "SUPABASE_URL": getattr(settings, "SUPABASE_URL", ""),
         "SUPABASE_ANON_KEY": getattr(settings, "SUPABASE_ANON_KEY", ""),
+        "OFFLINE_MODE": bool(getattr(settings, "OFFLINE_MODE", False)),
     }
